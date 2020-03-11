@@ -6,6 +6,8 @@ row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]];
 return iso<X -> X | row,row>;
 end function;
 
+eta := ALMap(X,auts); // Should just compute this once
+
 IsOnlyWithFamily:=function(QQ,p,X,auts,genusC)
 if p lt 14 then
 return "p is not big enough";
@@ -13,7 +15,7 @@ end if;
 
 
 //ptlist:=[];
-d:=3;
+// d:=3;
 
 QQDecomp := Decomposition(QQ);
 
@@ -23,7 +25,7 @@ end if;
 
 // Compute Atkin Lehner matrices in for X
 
-eta := ALMap(X,auts);
+//eta := ALMap(X,auts);
 
 // Find points we require and compute field of defintion
 
