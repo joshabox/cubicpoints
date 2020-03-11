@@ -413,6 +413,10 @@ I32:=ideal<CoordinateRing(AmbientSpace(X)) | [
     x[1] - 10*x[3] - 2*x[4] + 9*x[5],
     x[2] + 3*x[3] - 3*x[5]
 ]>;
+D31:=Divisor(X,I31);
+D32:=Divisor(X,I32);
+deg3npb:=deg3npb cat [D31,D32];
+deg3:=deg3npb cat deg3pb;
 
 //Finally, we do the sieve.
 assert &and[not IsSingular(ChangeRing(X,GF(p))) : p in [17]]; //Sanity check to verify that X has good reduction at primes used in the sieve.
@@ -687,7 +691,7 @@ m,k:=Min(ratios); //We select the prime that minimizes this ratio.
 return remprimes[k]; //and return its index in the set primes.
 end function;
 
-MWSieve:=function(L,primes,smallprimes,X,A,divs,auts,genusC,deg2pb,deg2npb,I,bp)
+MWSieve:=function(L,primes,smallprimes,X,A,divs,auts,genusC,deg3pb,deg3npb,I,bp)
 // We first compute the information we will need at every prime, to avoid double work.
 // This info is needed in the PrimeSelector function.
 jacs:=[]; // This will be a list of J(X)(\F_p) for p in primes.
@@ -737,6 +741,4 @@ end while;
 return #W;
 end function;
 
-
-
-
+MWSieve(deg3,[17,19,23],[],X,A,divs,auts,genusC,deg3pb,deg3npb,2,bp);
