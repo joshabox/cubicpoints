@@ -21,9 +21,6 @@ if #QQDecomp eq 1 then
 return false;
 end if;
 
-
-// First we need to identify which points come from the pullback, to make sure we're only taking one of them
-
 // Compute Atkin Lehner matrices in for X
 
 eta := ALMap(X,auts);
