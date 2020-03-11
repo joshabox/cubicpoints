@@ -18,7 +18,7 @@ d:=3;
 QQDecomp := Decomposition(QQ);
 
 if #QQDecomp eq 1 then
-return false;
+return false; //Our thm doesn't apply in this case
 end if;
 
 // Compute Atkin Lehner matrices in for X
@@ -47,11 +47,9 @@ end if;
 if not(quadratic) then
 K := RationalsAsNumberField();
 if (#QQDecomp eq 2) and (Pullback(eta,QQDecomp[1][1]) eq QQDecomp[2][1])  then 
-return false;
+return false; //thm doesn't apply here - so we return false and look for another point to which it applies in the res disk
 end if;
 end if;
-
-// Make magma view field of definition as a number field
 
 PointsToTest := [];
 
