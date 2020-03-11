@@ -93,8 +93,6 @@ Append(~Arows, [(omega/Differential(tQtilde))(Qtilde) : omega in omegas]);
 end for;
 
 Atilde:=Matrix(Arows);
-#Arows;
-Rank(Atilde);
 if Rank(Atilde) eq #Arows then return true; 
 else return false;
 end if;
