@@ -1,0 +1,742 @@
+//This code was written by Ozman and Siksek.
+//---------------------------------------------------------
+//
+// Function for writing down equations for X_0(N)
+// and the j-map.
+//
+//-------------------------------------------------------- 
+
+
+// Let N be a positive integer and n be a proper divisor.
+// Suppose X_0(N) has genus \ge 3 and is not hyperelliptic.
+// It is assumed that X_0(n) is in the Small Modular Curves database (n=1 is allowed).
+// The function returns
+// X,Z,phi,j, al, <num,denom>.
+// X is the modular curve X_0(N)
+// Z is the modular curve X_0(n) (exactly the same model as given by the Small Modular Curve package).
+// \phi : X_0(N) \rightarrow X_0(n) is the degeneracy map.
+// j is the j-function on X_0(N) as an element of its function field.
+// al is a list of matrices whose action on the ambient projective space
+// correspond to Atkin-Lehner involutions on X.
+// num and denom are elements of the coordinate ring of the ambient
+// space of X, such that num/denom restricted to X is the j-map.
+modeqns:=function(N,n);
+	assert IsDivisibleBy(N,n);
+	gen0:=[1..10] cat [12, 13, 16, 18, 25]; // Values of N for which X_0(N) has genus 0.
+	gen1:=[11, 14, 15, 17, 19, 20, 21, 24, 27, 32, 36, 49]; // Values of N for which X_0(N) has genus 1.
+	hyp:=[37] cat [40,48] cat [22,23,26,28,29,30,31,33,35,39,41,46,47,50,59,71]; // Values of N for which X_0(N) is hyperelliptic.
+	// These values are taken from Ogg's paper, "Hyperelliptic Modular Curves", Bull. Soc. math. France, 102, 1974, p. 449-462.
+	assert #gen0 eq 15;
+	assert #gen1 eq 12;
+	assert #hyp eq 19;
+	assert N in (gen0 cat gen1 cat hyp) eq false;
+	// Thus X_0(N) has genus \ge 3 and is non-hyperelliptic, so the canonical map is an embedding.
+	// We use this to construct the equations for X_0(N).
+	prec:=500;
+	L<q> := LaurentSeriesRing(Rationals(),prec);
+	S:=CuspForms(N);
+	dim:=Dimension(S);
+	if dim eq 3 then
+		R<x_0,x_1,x_2>:=PolynomialRing(Rationals(),dim);
+	elif dim eq 4 then 
+		R<x_0,x_1,x_2,x_3>:=PolynomialRing(Rationals(),dim);
+	elif dim eq 5 then
+		R<x_0,x_1,x_2,x_3,x_4>:=PolynomialRing(Rationals(),dim);
+	else
+		R<[x]>:=PolynomialRing(Rationals(),dim);
+	end if;
+	Bexp:=[L!qExpansion(S.i,prec) : i in [1..dim]];
+	eqns:=[R | ];
+	d:=1;
+	tf:=false;
+	while tf eq false do
+		d:=d+1;
+		mons:=MonomialsOfDegree(R,d);
+		monsq:=[Evaluate(mon,Bexp) : mon in mons];
+		V:=VectorSpace(Rationals(),#mons);
+		W:=VectorSpace(Rationals(),prec-10);
+		h:=hom<V->W | [W![Coefficient(monsq[i],j) : j in [1..(prec-10)]] : i in [1..#mons]]>;
+		K:=Kernel(h);
+		eqns:=eqns cat [ &+[Eltseq(V!k)[j]*mons[j] : j in [1..#mons] ] : k in Basis(K)  ];
+		X:=Scheme(ProjectiveSpace(R),eqns);
+		if Dimension(X) eq 1 then
+			if IsSingular(X) eq false then
+				X:=Curve(ProjectiveSpace(R),eqns);
+				if Genus(X) eq dim then
+					tf:=true;
+				end if;
+			end if;
+		end if;
+	end while;
+	eqns:=GroebnerBasis(ideal<R | eqns>); // Simplifying the equations.
+	tf:=true;
+	repeat
+		t:=#eqns;
+		tf:=(eqns[t] in ideal<R | eqns[1..(t-1)]>);
+		if tf then 
+			Exclude(~eqns,eqns[t]);
+		end if;
+	until tf eq false;
+	t:=0;
+	repeat
+		t:=t+1;
+		tf:=(eqns[t] in ideal<R | Exclude(eqns,eqns[t])>);	
+		if tf then
+			Exclude(~eqns,eqns[t]);
+			t:=0;
+		end if;
+	until tf eq false and t eq #eqns;
+	X:=Curve(ProjectiveSpace(R),eqns); // Our model for X_0(N) discovered via the canonical embedding.
+	assert Genus(X) eq dim;
+	assert IsSingular(X) eq false;
+	// We now check the equations for X rigorously, i.e.
+	// up to the Sturm bound.
+	indexGam:=N*&*[Rationals() | 1+1/p : p in PrimeDivisors(N)];	
+	indexGam:=Integers()!indexGam; // Index of Gamma_0(N) in SL_2(Z)
+	for eqn in eqns do
+		eqnScaled:=LCM([Denominator(c) : c in Coefficients(eqn)])*eqn;
+		wt:=2*Degree(eqn); // Weight of eqn as a cuspform.
+		hecke:=Ceiling(indexGam*wt/12);  // Hecke=Sturm bound.
+										// See Stein's book, Thm 9.18.
+		Bexp1:=[qExpansion(S.i,hecke+10) : i in [1..dim]]; // q-expansions
+                        // of basis for S 
+                        // up to precision hecke+10.
+		assert Valuation(Evaluate(eqnScaled,Bexp1)) gt hecke+1;
+	end for; // We have now checked the correctness of the equations for X.
+	Z:=SmallModularCurve(n); 
+	KZ:=FunctionField(Z);
+	qEZ:=qExpansionsOfGenerators(n,L,prec); // This gives gives qExpansions of the generators
+						// of the function field of Z=X_0(n) as Laurent series in q. 
+	KX:=FunctionField(X);
+	KXgens:=[KX!(R.i/R.dim) : i in [1..(dim-1)]] cat [KX!1]; // The functions x_i/x_dim as elements of the function field of X.
+	coords:=[]; // This will contain the generators of the function field of Z as element of the function of X.
+	for u in qEZ do
+		//We want to express u as an element of the function field of X=X_0(N).
+		Su:={};
+		d:=0;
+		while #Su eq 0 do
+			d:=d+1;
+			mons:=MonomialsOfDegree(R,d);
+			monsq:=[Evaluate(mon,Bexp) : mon in mons];
+			V:=VectorSpace(Rationals(),2*#mons);
+			W:=VectorSpace(Rationals(),prec-10);
+			h:=hom<V->W | 
+				[W![Coefficient(monsq[i],j) : j in [1..(prec-10)]] : i in [1..#mons]] 
+				cat  [ W![Coefficient(-u*monsq[i],j) : j in [1..(prec-10)]  ]  : i in [1..#mons] ]>;
+			K:=Kernel(h);
+			for a in [1..Dimension(K)] do
+				num:=&+[Eltseq(V!K.a)[j]*mons[j] : j in [1..#mons] ];
+				denom:=&+[Eltseq(V!K.a)[j+#mons]*mons[j] : j in [1..#mons] ];
+				numK:=Evaluate(num,KXgens); 
+				denomK:=Evaluate(denom,KXgens);
+				if numK ne KX!0 and denomK ne KX!0 then
+					Su:=Su join {numK/denomK};
+				end if;
+			end for;
+		end while;
+		assert #Su eq 1;
+		coords:=coords cat SetToSequence(Su);
+	end for;
+	phi:=map<X -> Z | coords cat [1]>;
+	jd:=Pullback(phi,jFunction(Z,n));
+		P:=AmbientSpace(X);
+		R:=CoordinateRing(P);
+		assert Rank(R) eq dim;
+		num:=Numerator(FunctionField(P)!jd);
+		denom:=Denominator(FunctionField(P)!jd);
+		num:=Evaluate(num,[R.i : i in [1..(dim-1)]]);
+		denom:=Evaluate(denom,[R.i : i in [1..(dim-1)]]);
+		deg:=Max([Degree(num),Degree(denom)]);
+		num:=Homogenization(num,R.dim,deg);
+		denom:=Homogenization(denom,R.dim,deg);
+		assert Evaluate(num,KXgens)/Evaluate(denom,KXgens) eq jd;	
+		// We compute the degree of j : X_0(N) --> X(1) using the formula
+		// in Diamond and Shurman, pages 106--107.
+		assert N gt 2;
+		dN:=(1/2)*N^3*&*[Rationals() | 1-1/p^2 : p in PrimeDivisors(N)];
+		dN:=Integers()!dN;
+		degj:=(2*dN)/(N*EulerPhi(N));
+		degj:=Integers()!degj; // Degree j : X_0(N)-->X(1)
+		degjd:=&+[-Valuation(jd,P)*Degree(P) : P in Poles(jd)];
+		assert degj eq degjd;
+		// Now if j \ne jd then the the difference j-jd is a rational
+		// function of degree at most 2*degj (think about the poles).
+		// Hence to prove that j=jd all we have to check is that their
+		// q-Expansions agree up to 2*degj+1.
+		jdExpansion:=Evaluate(num,Bexp)/Evaluate(denom,Bexp);
+		jdiff:=jdExpansion-jInvariant(q);
+		assert Valuation(jdiff) ge 2*degj+1; // We have proven the corrections of the
+										// j-map jd on X_0(N).
+	// Next we want to write down the matrices for the Atkin-Lehner
+	// operators on X_0(N)
+	alindices:=[ m : m in Divisors(N) | GCD(m,N div m) eq 1 and m gt 1];
+	al:=[AtkinLehnerOperator(S,m) : m in alindices];
+	return X, Z, phi, jd, al, <num,denom>;
+end function;
+
+// Search for divisors of degree 2
+// Given a curve X/\Q as before, and a bound bd and a true/false tf
+// this function returns
+// deg2,pls1,pls2,plsbig
+// Here pls1 is a set of places of degree 1
+// pls2 is a set of places of degree 2 and
+// plsbig is a set of places of degree at least 3 but less than genus.
+// pls1 are found by a search for rational points on X
+// pls2, plsbig are found by intersecting hyperplanes with X.
+// deg 2 are the known degree 2 effective divisors: sums of pairs of
+// elements of pls1, and elements of pls2.
+// If tf=true then the automorphism group of X is used
+// to enlarge the sets pls1 and pls2 (if possible).
+
+searchDiv2:=function(X,bd,tf);
+	g:=Genus(X);
+	//
+	// First we find degree 1 points
+	pts:=PointSearch(X , 1000);
+	pls1:={Place(P) : P in pts};
+	pls2:={};
+	plsbig:={};
+	R:=CoordinateRing(AmbientSpace(X));
+	n:=Rank(R);
+	// Next we intersect X with hyperplanes with coefficients bounded by bd
+	// and see what divisors we obtain.
+	C:=CartesianPower([-bd..bd],n);
+	ctr:=0;
+	for a in C do
+		ctr:=ctr+1;
+		//print #C,ctr,#pls1, #pls2,#plsbig;
+		b:=[a[i] : i in [1..n]];
+		if &or[b[i] ne 0 : i in [1..n]] then
+			if GCD(b) eq 1 and b[1] ge 0 then
+				f:=&+[b[i]*R.i : i in [1..n]];
+				D:=Divisor(X,ideal<R | f>);
+				decomp:=Decomposition(D);
+				for pr in decomp do
+					P:=pr[1];
+					if Degree(P) eq 1 then
+						pls1:=pls1 join {P};
+					else
+						if Degree(P) eq 2 then
+							pls2:=pls2 join {P};
+						else
+							if Degree(P) le g then
+								plsbig:=plsbig join {P};
+							end if;
+						end if;
+					end if;
+				end for;
+			end if;
+		end if;
+	end for;
+	if tf then
+		A:=Automorphisms(X); // We will use the automorphisms of X
+						// to enlarge the sets pls1, pls2.
+		for phi in A do
+			for P in pls1 do
+				D:=Pullback(phi,P);
+				pls1:=pls1 join {Decomposition(D)[1,1]};
+			end for;
+			for P in pls2 do
+				D:=Pullback(phi,P);
+				pls2:=pls2 join {Decomposition(D)[1,1]};
+			end for;
+		end for;
+	end if;
+	pls1:=SetToSequence(pls1);
+	pls2:=SetToSequence(pls2);
+	plsbig:=SetToSequence(plsbig);
+	deg2:=[];
+	for i,j in [1..#pls1] do
+		if i le j then
+			Append(~deg2,1*pls1[i]+1*pls1[j]);
+		end if;
+	end for;
+	deg2:=deg2 cat [1*P : P in pls2];
+	return deg2,pls1,pls2,plsbig;
+end function;
+
+
+//Input: curve X, isomorphism phi: X --> Y with Y planar and bound bd.
+searchDiv3:=function(X,phi,bd)
+Y:=Codomain(phi);
+P<x,y,z>:=AmbientSpace(Y);
+eqnY:=DefiningEquations(Y)[1];
+deg3Y:={};
+for a in [-bd..bd] do
+    for b in [-bd..bd] do
+        eqn:=Evaluate(eqnY,[x,a*x+b*z,z]);
+        fact:=[g[1] : g in Factorization(eqn)];
+        deg3factors:=[g: g in fact | Degree(g) eq 3];
+        deg3Y2:=deg3Y join {Divisor(Y,[g,y-a*x+b*z]) : g in deg3factors};
+        if #deg3Y2 gt #deg3Y then #deg3Y2; deg3Y2; end if;
+        deg3Y:=deg3Y2;
+    end for;
+end for;
+deg3X:=[Pullback(phi,DD) : DD in deg3Y];
+return deg3X;
+end function;
+tf,phi:=Genus5PlaneCurveModel(X);
+assert tf;
+
+// X is a projective curve over rationals,
+// p prime of good reduction,
+// D divisor on X,
+// This reduces to a divisor on X/F_p.
+
+reduce:=function(X,Xp,D);
+	if Type(D) eq DivCrvElt then
+		decomp:=Decomposition(D);
+		return &+[ pr[2]*$$(X,Xp,pr[1]) : pr in decomp]; // Reduce the problem to reducing places.
+	end if;
+	assert Type(D) eq PlcCrvElt;
+	if  Degree(D) eq 1 then
+		P:=D;
+		R<[x]>:=CoordinateRing(AmbientSpace(X));
+		m:=Rank(R);
+		KX:=FunctionField(X);
+		inds:=[i : i in [1..m] | &and[Valuation(KX!(x[j]/x[i]),P) ge 0 : j in [1..m]]];	
+		assert #inds ne 0;
+		i:=inds[1];
+		PP:=[Evaluate(KX!(x[j]/x[i]),P) : j in [1..m]];
+		denom:=LCM([Denominator(d) : d in PP]);
+		PP:=[Integers()!(denom*d) : d in PP];
+		g:=GCD(PP);
+		PP:=[d div g : d in PP];
+		Fp:=BaseRing(Xp);
+		PP:=Xp![Fp!d : d in PP];
+		return Place(PP);	
+	end if;
+	I:=Ideal(D);
+	Fp:=BaseRing(Xp);
+	p:=Characteristic(Fp);
+	B:=Basis(I) cat DefiningEquations(X);
+	m:=Rank(CoordinateRing(X));
+	assert Rank(CoordinateRing(Xp)) eq m;
+	R:=PolynomialRing(Integers(),m);
+	BR:=[];
+	for f in B do
+		g:=f*p^-(Minimum([Valuation(c,p) : c in Coefficients(f)]));
+		g:=g*LCM([Denominator(c) : c in Coefficients(g)]);
+		Append(~BR,g);
+	end for;
+	J:=ideal<R | BR>;
+	J:=Saturation(J,R!p);
+	BR:=Basis(J);
+	Rp:=CoordinateRing(AmbientSpace(Xp));
+	assert Rank(Rp) eq m;
+	BRp:=[Evaluate(f,[Rp.i : i in [1..m]]) : f in BR];
+	Jp:=ideal<Rp| BRp>;
+	Dp:=Divisor(Xp,Jp);
+	return Dp;
+end function;
+
+X,Z,phi,j,al,jd:=modeqns(65,13); //Just a few seconds.
+X;
+assert Genus(X) eq 5;
+
+RR<[u]>:=CoordinateRing(AmbientSpace(X));
+n:=Dimension(AmbientSpace(X));
+rows:=[[&+[RowSequence(a)[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]] : a in al] ;
+w5:=iso<X->X | rows[1],rows[1]>; 
+w13:=iso<X->X | rows[2], rows[2]>; 
+w65:=iso<X->X | rows[3] , rows[3]>; //These are the Atkin-Lehner involutions.
+assert w65 eq w5*w13; //Sanity check
+
+cusps:=[X![1,0,0,0,0],X![1,1,1,1,1],X![1/3,2/3,2/3,2/3,1],X![1/2,1/2,1/2,1/2,1]]; 
+assert &and[1/j(cusp) eq 0 : cusp in cusps]; //We have found the four cusps.
+assert {w(cusps[1]) : w in [w5*w5,w5,w13,w65]} eq Seqset(cusps);
+Dtors:=[Divisor(cusps[i])-Divisor(cusps[1]) : i in [2,3,4]];
+assert &and[not IsPrincipal(Dtor) : Dtor in Dtors]; //Sanity check
+//To compute the rational cuspidal subgroup, we embed the torsion subgroup into J_X(\F_7)
+X7:=ChangeRing(X,GF(7));
+C,phi,psi:=ClassGroup(X7);
+Z:=FreeAbelianGroup(1);
+degr:=hom<C->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(C)]>;
+JF7:=Kernel(degr); // This is isomorphic to J_X(\F_7).
+redDtors:=[JF7!psi(reduce(X,X7,DD)) : DD in Dtors];
+A:=sub<JF7 | redDtors>; //This is isomorphic to J_X(\Q)_{tors}.
+B:=AbelianGroup([2,84]);
+tf,isomm:=IsIsomorphic(A,B);
+assert tf; 
+assert &and[isomm(A.i) eq B.i : i in [1,2]]; //So A = Z/2Z x Z/84Z with A.1, A.2 being the generators
+Z3:=FreeAbelianGroup(3);
+hh:=hom<Z3-> A | redDtors>;
+assert hh(-9*Z3.1+2*Z3.2) eq A.1;
+assert Order(hh(17*Z3.1+13*Z3.2)) eq 84 and not 42*hh(17*Z3.1+13*Z3.2) eq hh(-9*Z3.1+2*Z3.2); //This shows that the generators of J_X(\Q)_{tors} are as claimed.
+
+
+//We now compute C and J(C)(\Q)
+C,projC:=CurveQuotient(AutomorphismGroup(X,[w65]));
+Eprime,hprime:=EllipticCurve(C,projC(cusps[1]));
+E,h:=SimplifiedModel(Eprime);
+XtoE:=Expand(projC*hprime*h);
+E;
+assert Conductor(E) eq 65;
+MWE,phi,tf1,tf2:=MordellWeilGroup(E);
+assert tf1; assert tf2; //This shows MWE is computed provably.
+assert IsIsomorphic(MWE,AbelianGroup([2,0])); //Shows MWE is Z/2Z x Z as abstract group.
+assert 2*MWE.1 eq Zero(MWE); //So MWE.1 is the generator of order 2.
+DD:=Pullback(XtoE,Place(phi(MWE.1)));
+assert DD eq Place(cusps[3])+Place(cusps[4]); //The pullback of the divisor phi(MWE.1)-Zero(E) to X is already torsion.
+seqQE:=[QQ : QQ in [phi(MWE.2),phi(-MWE.2)] | QQ eq E![1,0,1]];
+QE:=seqQE[1]; //QE is the claimed point.
+
+//We use this generator to find the free generator of J_0(65)(\Q)
+D:=Pullback(XtoE,Place(QE));
+bp:=Pullback(XtoE,Place(Zero(E)));
+assert bp eq Place(cusps[1]) + Pullback(w65,Place(cusps[1])); //Sanity check
+D1:=D-bp;
+K1<r>:=QuadraticField(-1);
+assert r^2 eq -1;
+PP:=(X(K1)![0,1,1/2*(1+r),1,1]);
+assert 1*Place(PP) eq D; //This shows the generator is as claimed.
+
+//Searching for degree 2 points on X directly takes a while. Since we conjecture that all quadratic points are pullbacks, we might as well work via E.
+ptsX:=PointSearch(X,1000);
+deg2:=Setseq({Pullback(XtoE,Place(phi(k*MWE.2+ep*MWE.1))) : k in {-10..10}, ep in {0,1}} join {Place(pt1) + Place(pt2) : pt1 in ptsX, pt2 in ptsX});
+deg2npb:=[Place(pt1) + Place(pt2) : pt1 in ptsX, pt2 in ptsX | not w65(pt1) eq pt2];
+deg2pb:=[DD : DD in deg2 | not DD in deg2npb]; //We split into pullbacks and non-pullbacks.
+deg3pb:=[Divisor(pt1)+DD : pt1 in ptsX, DD in deg2pb];
+deg3npb:=[Divisor(pt1)+Divisor(pt2)+Divisor(pt3) : pt1 in ptsX, pt2 in ptsX, pt3 in ptsX | #({pt1,pt2,pt3} meet {w65(pt1),w65(pt2),w65(pt3)}) eq 0];
+RR<[x]>:=CoordinateRing(AmbientSpace(X));
+I31:=ideal<CoordinateRing(AmbientSpace(X)) | [
+    x[3]^2 - 4/3*x[3]*x[5] - 41/129*x[4]*x[5] + 74/129*x[5]^2,
+    x[3]*x[4] - 1/3*x[3]*x[5] - 119/129*x[4]*x[5] + 26/129*x[5]^2,
+    x[3]*x[5] - 3*x[4]^2 + 122/43*x[4]*x[5] - 44/43*x[5]^2,
+    x[1] + x[3] - x[4] - x[5],
+    x[2] - 2/3*x[3] - 1/3*x[4] + 1/3*x[5]
+]>;
+I32:=ideal<CoordinateRing(AmbientSpace(X)) | [
+    x[3]^2 - 15/2*x[3]*x[5] - x[4]*x[5] + 6*x[5]^2,
+    x[3]*x[4] + x[3]*x[5] - 1/2*x[4]*x[5] - x[5]^2,
+    x[3]*x[5] - 2*x[4]^2 + 3*x[4]*x[5] - 2*x[5]^2,
+    x[1] - 10*x[3] - 2*x[4] + 9*x[5],
+    x[2] + 3*x[3] - 3*x[5]
+]>;
+
+//Finally, we do the sieve.
+assert &and[not IsSingular(ChangeRing(X,GF(p))) : p in [17]]; //Sanity check to verify that X has good reduction at primes used in the sieve.
+A:=AbelianGroup([0,2,84]);
+divs:=[D1,-9*Dtors[1]+2*Dtors[2],17*Dtors[1]+13*Dtors[2]];
+genusC:=Genus(C);
+auts:=[al[3]];
+I:=2;
+bp:=bp+Divisor(cusps[1]); //Need a basepoint of degree 3
+
+discQuadPlace:=function(P);
+        assert Degree(P) eq 2;
+        K:=ResidueClassField(P);
+    D:=Discriminant(MaximalOrder(K));
+    if IsDivisibleBy(D,4) then
+           D:=D div 4;
+    end if;
+        return D;
+end function;
+
+IsPullback:=function(QQ,deg3pb,deg3npb) 
+if 1*QQ in deg3pb then return true;
+else assert 1*QQ in deg3npb;
+return false;
+end if;
+end function;
+
+//The following function computes the expansion of a differential 
+//om around the uniformizer tQ of a point Q, up to the (n+1)th coefficient a_n.
+ExpandDifferential:=function(om,Q,tQ,n)
+assert n ge 0;
+dt:=Differential(tQ);
+f:=om/dt;
+alist:=[f(Q)];
+if n gt 0 then
+flist:=[(f-Evaluate(f,Q))/tQ];
+for i in [1..n] do
+    Append(~alist,flist[i](Q));
+    Append(~flist,(flist[i]-alist[i+1])/tQ);
+end for;
+end if;
+return alist;
+end function;
+
+IsLonely:=function(QQ,p,X,auts,genusC)
+if p le 13 then return false; end if; //Part of first condition in Theorem
+d:=3; //Just there to emphasize that we work on X^{(d)} for d=3.
+
+Fp:=GF(p);
+Xp:=ChangeRing(X,Fp);
+Rp<[u]>:=CoordinateRing(AmbientSpace(Xp));
+n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
+ws:=[]; //The set of mod p Atkin-Lehner involution(s)
+for M in auts do
+row:=[&+[RowSequence(M)[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]];
+Append(~ws,iso<Xp->Xp | row,row>);
+end for;
+V,phi:=SpaceOfDifferentialsFirstKind(Xp);
+ts:=[hom<V->V | [ (Pullback(wp,phi(V.i)))@@phi -V.i  : i in [1..Genus(X)] ]> : wp in ws];
+T:=&+[Image(t): t in ts]; //The space of vanishing differentials
+if not p eq 2 then assert Dimension(T) eq Genus(X) - genusC; end if; //cf Remark 3.7.
+omegas:=[phi(T.i) : i in [1..Dimension(T)]]; //A basis of vanishing differentials
+matrixseq:=[];
+dec:=Decomposition(reduce(X,Xp,QQ));
+Fq:=GF(p^(LCM([Degree(ResidueClassField(dd[1])) : dd in dec])));
+//Thm 3.2 of Samir also works with (a0,a1/2) when Q_1 neq Q_2 but Q1tilde = Q2tilde.
+for i in [1..#dec] do
+    Qtilde:=dec[i][1]; 
+    m:=dec[i][2];
+    Kp:=ResidueClassField(Qtilde);
+    Embed(Kp,Fq);
+    Qtildept:=Eltseq(RepresentativePoint(Qtilde));
+    if Degree(Kp) eq 1 then frobs:=[IdentityHomomorphism(Kp)];
+    else
+    frob:=hom< Kp->Kp | (Kp.1)^p >;
+    frobs:=[frob];
+    for j in [1..Degree(Kp)-1] do
+        Append(~frobs,frob*frobs[#frobs]);
+    end for;
+    end if;
+    assert #frobs eq Degree(Kp);
+    Qtildes:=[Xp(Kp)![fr(a) : a in Qtildept] : fr in frobs];
+    tQtildes:=[UniformizingParameter(Qtilde) : Qtilde in Qtildes];
+    for k in [1..#tQtildes] do
+        omlist:=[ExpandDifferential(om,Qtildes[k],tQtildes[k],m-1) : om in omegas];
+        for jj in [1..m] do
+        Append(~matrixseq,[Fq!om[jj]/jj : om in omlist]);
+        end for;
+    end for;
+end for;
+Atilde:=Matrix(matrixseq);
+Atilde;
+if Rank(Atilde) eq d then return true;
+else return false;
+end if;
+end function;
+
+
+ALMap := function(X,auts)
+R<[u]>:=CoordinateRing(AmbientSpace(X));
+n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
+row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]]; 
+//Note that this function is only called upon for N \neq 57 so #auts = 1
+return iso<X -> X | row,row>;
+end function;
+
+
+IsOnlyWithFamily:=function(QQ,p,X,auts,genusC)
+if p lt 14 then
+return "p is not big enough";
+end if;
+
+//ptlist:=[];
+d:=3;
+
+QQDecomp := Decomposition(QQ);
+
+if #QQDecomp eq 1 then
+return false; //Our thm doesn't apply in this case
+end if;
+
+// Compute Atkin Lehner matrices in for X
+
+eta := ALMap(X,auts);
+
+// Find points we require and compute field of defintion
+
+quadratic := false;
+if #QQDecomp lt 3 then
+ImportantPoints := QQDecomp;
+for Div in ImportantPoints do
+if Degree(ResidueClassField(Div[1])) gt 1 then
+quadratic := true;
+F := ResidueClassField(Div[1]);
+K := QuadraticField(Discriminant(MaximalOrder(F)));
+end if;
+end for;
+
+elif Pullback(eta,QQDecomp[1][1]) eq QQDecomp[2][1] then
+ImportantPoints := [QQDecomp[1],QQDecomp[3]];
+else
+ImportantPoints := [QQDecomp[1],QQDecomp[2]];
+end if;
+
+if not(quadratic) then
+K := RationalsAsNumberField();
+if (#QQDecomp eq 2) and (Pullback(eta,QQDecomp[1][1]) eq QQDecomp[2][1])  then 
+return false; //thm doesn't apply here - so we return false and look for another point to which it applies in the res disk
+end if;
+end if;
+
+PointsToTest := [];
+
+for Pt in ImportantPoints do
+tf, emb := IsSubfield(ResidueClassField(Pt[1]),K);
+PT := [emb(x) : x in Eltseq(RepresentativePoint(Pt[1]))];
+Append(~PointsToTest,PT);
+end for;
+
+OK:=RingOfIntegers(K);
+dec:=Factorization(p*OK);
+pp:=dec[1][1];
+
+// Compute ann. differentials of trace zero
+
+Fp,OKRedMap:=ResidueClassField(pp); // was pi previously
+Xp:=ChangeRing(X,Fp); //Depends on K 
+Rp<[u]>:=CoordinateRing(AmbientSpace(Xp));
+n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
+row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]]; 
+//Note that this function is only called upon for N \neq 57 so #auts = 1
+etap:=iso<Xp -> Xp | row,row>;
+
+V,phi:=SpaceOfDifferentialsFirstKind(Xp);
+t:=hom<V->V | [ (Pullback(etap,phi(V.i)))@@phi -V.i  : i in [1..Genus(X)] ]>;
+T:=Image(t);
+// if not p eq 2 then assert Dimension(T) eq Genus(X) - genusC; end if;
+omegas:=[phi(T.i) : i in [1..Dimension(T)]];
+
+unif:=UniformizingElement(pp);
+
+Arows := [];
+for Q in PointsToTest do
+m:=Minimum([Valuation(a,pp) : a in Pt | not a eq 0]);
+Qred:=[unif^(-m)*a : a in Q];
+Qtilde:=Xp![Evaluate(a,Place(pp)) : a in Qred];
+tQtilde:=UniformizingParameter(Qtilde);
+Append(~Arows, [(omega/Differential(tQtilde))(Qtilde) : omega in omegas]);
+end for;
+
+Atilde:=Matrix(Arows);
+#Arows;
+Rank(Atilde);
+if Rank(Atilde) eq #Arows then return true; 
+else return false;
+end if;
+end function;
+
+ChabautyInfo:=function(L,p,X,auts,genusC,A,B,iA,W,divs,deg3pb,deg3npb,I,bp)
+Fp:=GF(p);
+Xp:=ChangeRing(X,Fp);
+Rp<xp,yp,zp>:=CoordinateRing(AmbientSpace(Xp));
+Cp:=ChangeRing(C,Fp);
+CC,phi,psi:=ClassGroup(Xp);
+Z:=FreeAbelianGroup(1);
+degr:=hom<CC->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(CC)]>;
+JFp:=Kernel(degr); // This is isomorphic to J_X(\F_p).
+divsp:=[reduce(X,Xp,divi) : divi in divs];
+bpp:=reduce(X,Xp,bp); //We reduce the divisors and the basepoint
+h:=hom<A -> JFp | [JFp!psi(divp) : divp in divsp]>; //The map A--> J_X(\F_p).
+Bp,iAp:=sub<A | Kernel(h)>;
+newB,newiA:=sub<A | iA(B) meet iAp(Bp)>;
+AmodnewB,pi1:=quo< A | newiA(newB)>;
+AmodB,pi2:=quo<AmodnewB | pi1(iA(B))>;
+W:=[(x+w)@@pi1 : x in Kernel(pi2), w in pi1(W)];
+B:=newB; iA:=newiA;
+imW:=[h(x) : x in W]; //And map them to J_X(\F_p).
+redL1:=[reduce(X,Xp,DD) : DD in L];
+redL:=[JFp!psi(I*DD-I*bpp) : DD in redL1 | Degree(DD) eq 3]; // 
+
+//posLX:=[L[i] : i in [1..#L] |  Degree(redL1[i]) eq 3 and (JFp!psi(I*redL1[i]-I*bpp)) in imW];
+//posredL:=[redL1[i] : i in [1..#redL1] | redL[i] in imW];
+posindex:=[i : i in [1..#L] | JFp!psi(I*redL1[i]-I*bpp) in imW];
+jposP:={x : x in imW | not x in redL};
+
+//Because the map X^{(3)}(Fp) --> JFp (after composition with multiplication by I) may not be injective
+//we add the points in redL back in whenever one of its preimages in X^{(3)}(Fp) is not excluded by Chabauty.
+for i in posindex do
+EE:=redL1[i];
+DDs:=[j : j in [1..#L] | redL1[j] eq EE];
+DD:=DDs[1];
+if DD in deg3npb then
+    if not IsLonely(DD,p,X,auts,genusC) then jposP:=jposP join {JFp!psi(I*reduce(X,Xp,DD)-I*bpp)}; //Case of Theorem XX.
+    end if; 
+else 
+    if  &and[not IsOnlyWithFamily(DD,p,X,auts,genusC) : DD in DDs] then jposP:=jposP join {JFp!psi(I*reduce(X,Xp,DD)-I*bpp)}; 
+    end if;
+end if;
+end for; 
+
+jposP:=[DD : DD in jposP | Dimension(RiemannRochSpace(I*phi(DD) + I*bpp)) gt 0];
+print "the nr of jposP is"; #jposP;
+W:=[x : x in W | h(x) in jposP]; //Representatives for the B-cosets of A corresponding to jposP.
+return W,B,iA; 
+end function;
+
+
+PrimeSelector:=function(B,iA,primes,exclprimes,jacs,divlist,X)
+d:=3;
+ratios:=[];
+remprimes:=[j : j in [1..#primes] | not primes[j] in exclprimes]; 
+//Indices of remaining primes with even #J(X)(\F_p). If sieve does not succeed
+//one can try taking only primes whose #J(X)(\F_p) have different/multiple prime divisors in common.
+
+for i in remprimes do //We first rebuild the mod p divisors from their sequences.
+p:=primes[i];
+Ji:=jacs[i];
+divspseq:=[divlist[j][i] : j in [1..#divlist]];
+divsp:=[];
+for k in [1..#divlist] do
+ik:=Maximum([j : j in [1..100] | not divspseq[k][j] eq 0]);
+Dkp:=&+[divspseq[k][j]*Ji.j : j in [1..ik]];
+Append(~divsp,Dkp);
+end for;
+h:=hom<Codomain(iA) -> Ji | divsp>; //This is the reduction map A->J(X)(\Fp). 
+phi:=iA*h;
+Append(~ratios,Rationals()!(Index(Domain(phi),Kernel(phi))*(p^d/#Ji)));
+// Each step in the sieve, the size of W gets multiplied by approximately
+// [B : B \cap Bp]*#Wp/[A : Bp]. We approximate #Wp/[A:Bp] by #X(\F_{p^d})/#Ji.
+end for;
+m,k:=Min(ratios); //We select the prime that minimizes this ratio.
+return remprimes[k]; //and return its index in the set primes.
+end function;
+
+MWSieve:=function(L,primes,smallprimes,X,A,divs,auts,genusC,deg2pb,deg2npb,I,bp)
+// We first compute the information we will need at every prime, to avoid double work.
+// This info is needed in the PrimeSelector function.
+jacs:=[]; // This will be a list of J(X)(\F_p) for p in primes.
+divlist:=[[]: i in [1..#divs]]; // divlist[i] is a list of the divisors reduce(X,Xp,div[i]).
+for p in primes do
+p;
+Fp:=GF(p);
+Xp:=ChangeRing(X,Fp);
+CGp,phi,psi:=ClassGroup(Xp);
+Z:=FreeAbelianGroup(1);
+degr:=hom<CGp->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(CGp)]>;
+JFp:=Kernel(degr); // This is isomorphic to J_X(\F_p).
+Append(~jacs,JFp); 
+for i in [1..#divs] do
+Dip:=JFp!psi(reduce(X,Xp,divs[i])); 
+Dipseq:=Eltseq(Dip);
+Dipseq:=Dipseq cat [0*i : i in [1..(100-#Dipseq)]]; //We convert divisors into a sequence of length 100 in order to save them in a list
+Append(~divlist[i],Dipseq);
+end for;
+end for;
+
+// We now set up the sieve.
+B,iA:=sub<A|A>; // This subgroup will shrink as we consider more primes. We excluded the coset 0+B because it corresponds to points from the quotient.
+W:={0*A.1}; // This will be our set of possible B-cosets in A. Will grow.
+// Together, B+W \subset A consists of the possible images of unknown (rational)
+// points in A. The map X(\Q) \to A is composition of X(\Q) \to J(X)(\Q) and
+// multiplication by integer I such that I*J(X)(\Q) \subset A.
+exclprimes:=[]; // The set of primes we have considered.
+for p in smallprimes do
+p;
+W,B,iA:=ChabautyInfo(L,p,X,auts,genusC,A,B,iA,W,divs,deg3pb,deg3npb,I,bp);
+if W eq [] then return true; end if;
+#W;
+end for;
+
+while not Seqset(exclprimes) eq Seqset(primes) do
+ind:=PrimeSelector(B,iA,primes,exclprimes,jacs,divlist,X); 
+p:=primes[ind]; // We select the next prime.
+Append(~exclprimes,p);
+p;
+W,B,iA:=ChabautyInfo(L,p,X,auts,genusC,A,B,iA,W,divs,deg3pb,deg3npb,I,bp);
+// Whatever Chabauty method we use, it should output a subgroup iAp: Bp \to A and
+// a set Wp of Bp-cosets containing the hypothetical unknown points.
+if W eq [] then return true; end if;
+#W;
+end while;
+return #W;
+end function;
+
+
+
+
