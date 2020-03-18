@@ -23,16 +23,18 @@ QQDecomp := Decomposition(QQ);
 //First case all points are equal or distinct
 if #QQDecomp eq 1 then
 AwkwardDivisor := true;
-end if;
-
-if #QQDecomp ne 2 then
 K:= RationalsAsNumberField();
 ImportantPoints := QQDecomp;
 end if;
 
-// Compute Atkin Lehner matrices in for X
-
-//eta := ALMap(X,auts);
+if #QQDecomp eq 3 then
+K := RationalsAsNumberField();
+if eta(QQDecomp[1][1]) eq eta(QQDecomp[2][1]) then
+ImportantPoints := [QQDecomp[1],QQDecomp[3]];
+else
+ImportantPoints := eta(QQDecomp[1][1]) eq eta(QQDecomp[3][1]) select [QQDecomp[1],QQDecomp[2]] else [QQDecomp[1],QQDecomp[3]];
+end if;
+end if;
 
 // Find points we require and compute field of defintion
 // Second case have either a quadratic point or a repeated point
