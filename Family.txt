@@ -1,14 +1,15 @@
-ALMap := function(X,auts)
+LMap := function(X,auts)
 R<[u]>:=CoordinateRing(AmbientSpace(X));
 n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
-row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]]; 
+row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]];
 //Note that this function is only called upon for N \neq 57 so #auts = 1
 return iso<X -> X | row,row>;
 end function;
 
-eta := ALMap(X,auts); // Should just compute this once
 
 IsOnlyWithFamily:=function(QQ,p,X,auts,genusC)
+eta := ALMap(X,auts); // really we only need to comput this once
+AwkwardDivisor := false;
 if p lt 14 then
 return "p is not big enough";
 end if;
@@ -19,8 +20,14 @@ end if;
 
 QQDecomp := Decomposition(QQ);
 
+//First case all points are equal or distinct
 if #QQDecomp eq 1 then
-return false; //Our thm doesn't apply in this case
+AwkwardDivisor := true;
+end if;
+
+if #QQDecomp ne 2 then
+K:= RationalsAsNumberField();
+ImportantPoints := QQDecomp;
 end if;
 
 // Compute Atkin Lehner matrices in for X
@@ -28,29 +35,21 @@ end if;
 //eta := ALMap(X,auts);
 
 // Find points we require and compute field of defintion
+// Second case have either a quadratic point or a repeated point
+if #QQDecomp eq 2 then
 
-quadratic := false;
-if #QQDecomp lt 3 then
-ImportantPoints := QQDecomp;
-for Div in ImportantPoints do
+for Div in QQDecomp do
 if Degree(ResidueClassField(Div[1])) gt 1 then
-quadratic := true;
+ImportantPoints := QQDecomp;
 F := ResidueClassField(Div[1]);
 K := QuadraticField(Discriminant(MaximalOrder(F)));
 end if;
 end for;
 
-elif Pullback(eta,QQDecomp[1][1]) eq QQDecomp[2][1] then
-ImportantPoints := [QQDecomp[1],QQDecomp[3]];
 else
-ImportantPoints := [QQDecomp[1],QQDecomp[2]];
-end if;
-
-if not(quadratic) then
+ImportantPoints := [(QQDecomp[1][1] eq 2) select QQDecomp[2] else QQDecomp[1]]; //Need to select 'R'
 K := RationalsAsNumberField();
-if (#QQDecomp eq 2) and (Pullback(eta,QQDecomp[1][1]) eq QQDecomp[2][1])  then 
-return false; //thm doesn't apply here - so we return false and look for another point to which it applies in the res disk
-end if;
+AwkwardDivisor := true;
 end if;
 
 PointsToTest := [];
@@ -68,10 +67,10 @@ pp:=dec[1][1];
 // Compute ann. differentials of trace zero
 
 Fp,OKRedMap:=ResidueClassField(pp); // was pi previously
-Xp:=ChangeRing(X,Fp); //Depends on K 
+Xp:=ChangeRing(X,Fp); //Depends on K
 Rp<[u]>:=CoordinateRing(AmbientSpace(Xp));
 n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
-row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]]; 
+row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]];
 //Note that this function is only called upon for N \neq 57 so #auts = 1
 etap:=iso<Xp -> Xp | row,row>;
 
@@ -86,16 +85,20 @@ omegas:=[phi(T.i) : i in [1..Dimension(T)]];
 unif:=UniformizingElement(pp);
 
 Arows := [];
+
 for Q in PointsToTest do
-m:=Minimum([Valuation(a,pp) : a in Pt | not a eq 0]);
+m:=Minimum([Valuation(a,pp) : a in Q | not a eq 0]);
 Qred:=[unif^(-m)*a : a in Q];
 Qtilde:=Xp![Evaluate(a,Place(pp)) : a in Qred];
 tQtilde:=UniformizingParameter(Qtilde);
-Append(~Arows, [(omega/Differential(tQtilde))(Qtilde) : omega in omegas]);
+Append(~Arows,[(omega/Differential(tQtilde))(Qtilde) : omega in omegas]);
+if AwkwardDivisor then
+Append(~Arows,[((omega/Differential(tQtilde)-(omega/Differential(tQtilde))(Qtilde))/tQtilde)(Qtilde) : omega in omegas]);
+end if;
 end for;
 
 Atilde:=Matrix(Arows);
-if Rank(Atilde) eq #Arows then return true; 
+if Rank(Atilde) eq #Arows then return true;
 else return false;
 end if;
 end function;
