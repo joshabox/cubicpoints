@@ -275,8 +275,8 @@ end for;
 deg3X:=[Pullback(phi,DD) : DD in deg3Y];
 return deg3X;
 end function;
-tf,phi:=Genus5PlaneCurveModel(X);
-assert tf;
+//tf,phi:=Genus5PlaneCurveModel(X);
+//assert tf;
 
 // X is a projective curve over rationals,
 // p prime of good reduction,
