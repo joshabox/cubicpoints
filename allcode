@@ -525,48 +525,54 @@ end function;
 
 
 IsOnlyWithFamily:=function(QQ,p,X,auts,genusC)
+eta := ALMap(X,auts); // really we only need to comput this once
+AwkwardDivisor := false;
 if p lt 14 then
 return "p is not big enough";
 end if;
 
+
 //ptlist:=[];
-d:=3;
+// d:=3;
 
 QQDecomp := Decomposition(QQ);
 
+//First case all points are rational and either all  equal or distinct
 if #QQDecomp eq 1 then
-return false; //Our thm doesn't apply in this case
+AwkwardDivisor := true;
+K:= RationalsAsNumberField();
+ImportantPoints := QQDecomp;
 end if;
 
-// Compute Atkin Lehner matrices in for X
+if #QQDecomp eq 3 then
+K := RationalsAsNumberField();
+if QQDecomp[1][1] eq Pullback(eta,QQDecomp[2][1]) then
+ImportantPoints := [QQDecomp[1],QQDecomp[3]];
+else
+ImportantPoints := QQDecomp[1][1] eq Pullback(eta,QQDecomp[3][1]) select [QQDecomp[1],QQDecomp[2]] else [QQDecomp[1],QQDecomp[3]];
+end if;
+end if;
 
-eta := ALMap(X,auts);
-
-// Find points we require and compute field of defintion
-
+// Second case have either a quadratic point or a  divisor of the form 2*Q + w(Q)
+if #QQDecomp eq 2 then
 quadratic := false;
-if #QQDecomp lt 3 then
-ImportantPoints := QQDecomp;
-for Div in ImportantPoints do
+for Div in QQDecomp do
 if Degree(ResidueClassField(Div[1])) gt 1 then
-quadratic := true;
+ImportantPoints := QQDecomp;
 F := ResidueClassField(Div[1]);
 K := QuadraticField(Discriminant(MaximalOrder(F)));
+quadratic := true;
 end if;
 end for;
 
-elif Pullback(eta,QQDecomp[1][1]) eq QQDecomp[2][1] then
-ImportantPoints := [QQDecomp[1],QQDecomp[3]];
-else
-ImportantPoints := [QQDecomp[1],QQDecomp[2]];
+if not(quadratic) then 
+ImportantPoints := [(QQDecomp[1][2] eq 2) select QQDecomp[2] else QQDecomp[1]]; //Need to select w(Q)
+K := RationalsAsNumberField();
+AwkwardDivisor := true;
+end if;
 end if;
 
-if not(quadratic) then
-K := RationalsAsNumberField();
-if (#QQDecomp eq 2) and (Pullback(eta,QQDecomp[1][1]) eq QQDecomp[2][1])  then 
-return false; //thm doesn't apply here - so we return false and look for another point to which it applies in the res disk
-end if;
-end if;
+
 
 PointsToTest := [];
 
@@ -596,20 +602,24 @@ T:=Image(t);
 // if not p eq 2 then assert Dimension(T) eq Genus(X) - genusC; end if;
 omegas:=[phi(T.i) : i in [1..Dimension(T)]];
 
+
+
 unif:=UniformizingElement(pp);
 
 Arows := [];
+
 for Q in PointsToTest do
-m:=Minimum([Valuation(a,pp) : a in Pt | not a eq 0]);
+m:=Minimum([Valuation(a,pp) : a in Q | not a eq 0]);
 Qred:=[unif^(-m)*a : a in Q];
 Qtilde:=Xp![Evaluate(a,Place(pp)) : a in Qred];
 tQtilde:=UniformizingParameter(Qtilde);
-Append(~Arows, [(omega/Differential(tQtilde))(Qtilde) : omega in omegas]);
+Append(~Arows,[(omega/Differential(tQtilde))(Qtilde) : omega in omegas]);
+if AwkwardDivisor then
+Append(~Arows,[((omega/Differential(tQtilde)-(omega/Differential(tQtilde))(Qtilde))/tQtilde)(Qtilde) : omega in omegas]);
+end if;
 end for;
 
 Atilde:=Matrix(Arows);
-#Arows;
-Rank(Atilde);
 if Rank(Atilde) eq #Arows then return true; 
 else return false;
 end if;
