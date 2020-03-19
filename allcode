@@ -413,9 +413,22 @@ I32:=ideal<CoordinateRing(AmbientSpace(X)) | [
     x[1] - 10*x[3] - 2*x[4] + 9*x[5],
     x[2] + 3*x[3] - 3*x[5]
 ]>;
-D31:=Divisor(X,I31);
-D32:=Divisor(X,I32);
-deg3npb:=deg3npb cat [D31,D32];
+I33:=ideal<CoordinateRing(AmbientSpace(X)) | [
+    x[3]^2 - 25/32*x[3]*x[5] + 23/32*x[4]*x[5] - 13/32*x[5]^2,
+    x[3]*x[4] - 13/16*x[3]*x[5] + 3/16*x[4]*x[5] - 1/16*x[5]^2,
+    x[3]*x[5] - 8*x[4]^2 + 9*x[4]*x[5] - 3*x[5]^2,
+    x[1] + 8*x[4] - 6*x[5],
+    x[2] - 2*x[3] + 5*x[4] - 3*x[5]
+]>;
+I34:=ideal<CoordinateRing(AmbientSpace(X)) | [ x[3]^2 - 135/92*x[3]*x[5] + 1/4*x[4]*x[5] + 59/184*x[5]^2,
+    x[3]*x[4] - 39/46*x[3]*x[5] - 1/2*x[4]*x[5] + 19/46*x[5]^2,
+    x[3]*x[5] + 23*x[4]^2 - 69/2*x[4]*x[5] + 47/4*x[5]^2,
+    x[1] - 4*x[3] + 4*x[4] - x[5],
+    x[2] - 4*x[3] + 3*x[4] - 1/2*x[5]
+]>;
+Is:=[I31,I32,I33,I34];
+excDs:=[Divisor(X,II) : II in Is];
+deg3npb:=deg3npb cat excDs;
 deg3:=deg3npb cat deg3pb;
 
 //Finally, we do the sieve.
