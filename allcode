@@ -670,17 +670,17 @@ jposP:={x : x in imW | not x in redL};
 for i in posindex do
 EE:=redL1[i];
 DDs:=[j : j in [1..#L] | redL1[j] eq EE];
-DD:=DDs[1];
+DD:=L[DDs[1]];
 if DD in deg3npb then
     if not IsLonely(DD,p,X,auts,genusC) then jposP:=jposP join {JFp!psi(I*reduce(X,Xp,DD)-I*bpp)}; //Case of Theorem XX.
     end if; 
 else 
-    if  &and[not IsOnlyWithFamily(DD,p,X,auts,genusC) : DD in DDs] then jposP:=jposP join {JFp!psi(I*reduce(X,Xp,DD)-I*bpp)}; 
+    if  &and[not IsOnlyWithFamily(L[DDD],p,X,auts,genusC) : DDD in DDs] then jposP:=jposP join {JFp!psi(I*reduce(X,Xp,DD)-I*bpp)}; 
     end if;
 end if;
 end for; 
 
-jposP:=[DD : DD in jposP | Dimension(RiemannRochSpace(I*phi(DD) + I*bpp)) gt 0];
+jposP:=[DDD : DDD in jposP | Dimension(RiemannRochSpace(I*phi(DDD) + I*bpp)) gt 0];
 print "the nr of jposP is"; #jposP;
 W:=[x : x in W | h(x) in jposP]; //Representatives for the B-cosets of A corresponding to jposP.
 return W,B,iA; 
