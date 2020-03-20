@@ -393,7 +393,7 @@ assert 1*Place(PP) eq D; //This shows the generator is as claimed.
 
 //Searching for degree 2 points on X directly takes a while. Since we conjecture that all quadratic points are pullbacks, we might as well work via E.
 ptsX:=PointSearch(X,1000);
-deg2pb:=[Pullback(XtoE,Place(phi(k*MWE.2+ep*MWE.1))) : k in [-100..100], ep in [0,1]];
+deg2pb:=[Pullback(XtoE,Place(phi(k*MWE.2+ep*MWE.1))) : k in [-50..50], ep in [0,1]];
 print 1;
 deg1p1:=Setseq({Place(pt1) + Place(pt2) : pt1 in ptsX, pt2 in ptsX});
 deg2npb:=[Place(pt1) + Place(pt2) : pt1 in ptsX, pt2 in ptsX | not w65(pt1) eq pt2];
