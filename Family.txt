@@ -1,67 +1,62 @@
 ALMap := function(X,auts)
 R<[u]>:=CoordinateRing(AmbientSpace(X));
 n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
-row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]]; 
+row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]];
 //Note that this function is only called upon for N \neq 57 so #auts = 1
 return iso<X -> X | row,row>;
 end function;
 
+/* In the below ratpt should be given as Place(RationalPoint), pb a pullback and ratpts should contain a set of rational pts of X. 
+For example, after loading "X065.m" the following should return "true"
+IsOnlyWithFamily(Place(cusps[1]),deg2pb[1],19,X,[al[3]],Genus(C),cusps);
+*/
 
-IsOnlyWithFamily:=function(QQ,p,X,auts,genusC)
-eta := ALMap(X,auts); // really we only need to comput this once
-AwkwardDivisor := false;
+IsOnlyWithFamily:=function(ratpt,pb,p,X,auts,genusC,ratpts)
 if p lt 14 then
 return "p is not big enough";
 end if;
+rationalpts := [Place(Pt) : Pt in ratpts];
+eta := ALMap(X,auts); // really we only need to compute this once
 
 
-//ptlist:=[];
-// d:=3;
-
-QQDecomp := Decomposition(QQ);
-
-//First case all points are rational and either all  equal or distinct
-if #QQDecomp eq 1 then
-AwkwardDivisor := true;
-K:= RationalsAsNumberField();
-ImportantPoints := QQDecomp;
-end if;
-
-if #QQDecomp eq 3 then
+// We first check if pb is a sum of rational pts
+rational := false;
+AwkwardDivisor := false;
+n := #rationalpts;
+for i in {x: x in CartesianProduct([{1 .. n},{1..n}])| x[1] le x[2]} do
+if pb eq (rationalpts[i[1]]+ rationalpts[i[2]]) then
+rational := true;
 K := RationalsAsNumberField();
-if QQDecomp[1][1] eq Pullback(eta,QQDecomp[2][1]) then
-ImportantPoints := [QQDecomp[1],QQDecomp[3]];
-else
-ImportantPoints := QQDecomp[1][1] eq Pullback(eta,QQDecomp[3][1]) select [QQDecomp[1],QQDecomp[2]] else [QQDecomp[1],QQDecomp[3]];
-end if;
-end if;
-
-// Second case have either a quadratic point or a  divisor of the form 2*Q + w(Q)
-if #QQDecomp eq 2 then
-quadratic := false;
-for Div in QQDecomp do
-if Degree(ResidueClassField(Div[1])) gt 1 then
-ImportantPoints := QQDecomp;
-F := ResidueClassField(Div[1]);
-K := QuadraticField(Discriminant(MaximalOrder(F)));
-quadratic := true;
+index := [Index(rationalpts, ratpt),i[1],i[2]];
+break;
 end if;
 end for;
 
-if not(quadratic) then 
-ImportantPoints := [(QQDecomp[1][2] eq 2) select QQDecomp[2] else QQDecomp[1]]; //Need to select w(Q)
-K := RationalsAsNumberField();
-AwkwardDivisor := true;
+if rational then
+  if Multiplicity(index,index[1]) eq 3 then
+   ImportantPoints := [ratpt]; // need to select "w(Q)" (=Q here)
+   AwkwardDivisor := true;
+  elif (Multiplicity(index,index[1]) eq 2) then
+   ImportantPoints := (Multiplicity(index,index[2]) eq 2) select [rationalpts[index[3]]] else  [rationalpts[index[2]]]; // need to select "w(Q)"
+   AwkwardDivisor := true;
+   assert Pullback(eta, ratpt) eq ImportantPoints[1]; // check we've selected "w(Q)"
+  else
+   ImportantPoints := [ratpt, rationalpts[index[2]]]; // all points are distinct, so we take ratpt and one of the points from the pullback
+   assert (index[1]-index[2])*(index[1]-index[3])*(index[2]-index[3]) ne 0; //check
+  end if;
+else
+ Decomp := Decomposition(pb); // decompose pullback
+ ImportantPoints := [ratpt,Decomp[1][1]];
+ F := ResidueClassField(Decomp[1][1]);
+ K := QuadraticField(Discriminant(MaximalOrder(F)));
 end if;
-end if;
-
 
 
 PointsToTest := [];
 
 for Pt in ImportantPoints do
-tf, emb := IsSubfield(ResidueClassField(Pt[1]),K);
-PT := [emb(x) : x in Eltseq(RepresentativePoint(Pt[1]))];
+tf, emb := IsSubfield(ResidueClassField(Pt),K);
+PT := [emb(x) : x in Eltseq(RepresentativePoint(Pt))];
 Append(~PointsToTest,PT);
 end for;
 
@@ -71,11 +66,11 @@ pp:=dec[1][1];
 
 // Compute ann. differentials of trace zero
 
-Fp,OKRedMap:=ResidueClassField(pp); // was pi previously
-Xp:=ChangeRing(X,Fp); //Depends on K 
+Fp :=ResidueClassField(pp);
+Xp:=ChangeRing(X,Fp); //Depends on K
 Rp<[u]>:=CoordinateRing(AmbientSpace(Xp));
 n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
-row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]]; 
+row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]];
 //Note that this function is only called upon for N \neq 57 so #auts = 1
 etap:=iso<Xp -> Xp | row,row>;
 
@@ -103,7 +98,7 @@ end if;
 end for;
 
 Atilde:=Matrix(Arows);
-if Rank(Atilde) eq #Arows then return true; 
+if Rank(Atilde) eq #Arows then return true;
 else return false;
 end if;
 end function;
