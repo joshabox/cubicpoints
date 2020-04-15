@@ -667,7 +667,6 @@ print "If I return true then all points are known.";
 jacs:=[]; // This will be a list of J(X)(\F_p) for p in primes.
 divlist:=[[]: i in [1..#divs]]; // divlist[i] is a list of the divisors reduce(X,Xp,div[i]).
 for p in primes do
-print "We consider the prime"; p;
 Fp:=GF(p);
 Xp:=ChangeRing(X,Fp);
 CGp,phi,psi:=ClassGroup(Xp);
@@ -684,7 +683,7 @@ end for;
 end for;
 
 // We now set up the sieve.
-B,iA:=sub<A|A.1,A.2,A.3>; // This subgroup will shrink as we consider more primes. We excluded the coset 0+B because it corresponds to points from the quotient.
+B,iA:=sub<A|A>; // This subgroup will shrink as we consider more primes. We excluded the coset 0+B because it corresponds to points from the quotient.
 W:={0*A.1}; // This will be our set of possible B-cosets in A. Will grow.
 // Together, B+W \subset A consists of the possible images of unknown (rational)
 // points in A. The map X(\Q) \to A is composition of X(\Q) \to J(X)(\Q) and
@@ -703,6 +702,7 @@ while not Seqset(exclprimes) eq Seqset(primes) do
 ind:=PrimeSelector(B,iA,primes,exclprimes,jacs,divlist,X); 
 p:=primes[ind]; // We select the next prime.
 Append(~exclprimes,p);
+print "We consider the prime"; p;
 p;
 W,B,iA:=ChabautyInfo(Lpb,Lnpb,p,X,auts,genusC,A,B,iA,W,divs,I,bp);
 // Whatever Chabauty method we use, it should output a subgroup iAp: Bp \to A and
