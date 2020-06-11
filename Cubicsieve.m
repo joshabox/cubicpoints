@@ -60,6 +60,22 @@ end for;
 Atilde:=Matrix(matrixseq);
 if Rank(Atilde) eq d then return true;
 
+elif &and[Rank(Atilde) eq d -1, m ne d,Degree(Fq) eq 1] then
+    for k in [1..#tQtildes] do
+        omlist:=[ExpandDifferential(om,Qtildes[k],tQtildes[k],m) : om in omegas];
+        Append(~matrixseq,[Fq!om[m+1]/(m+1) : om in omlist]);
+    end for;
+    Atilde :=Matrix(matrixseq);
+    if Rank(Atilde) ne d then
+       return false, Atilde, Rank(Atilde);
+    end if;
+    K:=Kernel(Atilde);
+    assert Dimension(K) eq 1;
+    b:=Eltseq(Basis(K)[1]);
+    if b[4] eq 0 and b[3] ne 0 then
+	return true;
+    end if;
+    
 elif Rank(Atilde) eq d-1 and m eq d then
     Fqq:=GF(p^3);
     Embed(Fq,Fqq);
@@ -180,12 +196,18 @@ n:=&*([1] cat [pp[1]^(pp[2]) : pp in fact | pp[1] gt 23]);
 mn:=hom<JFp -> JFp | [n*g : g in OrderedGenerators(JFp)]>; 
 
 // Compute ann. differentials of trace zero
-etap:=ALMap(Xp,auts);
-V,phii:=SpaceOfDifferentialsFirstKind(Xp);
-t:=hom<V->V | [ (Pullback(etap,phii(V.i)))@@phii -V.i  : i in [1..Genus(X)] ]>;
-T:=Image(t); //The space of ann. diffs. of trace zero.
-if not p eq 2 then assert Dimension(T) eq Genus(X) - genusC; end if;
-omegas:=[phii(T.i) : i in [1..Dimension(T)]]; //A list of lin. indep. ann. diffs. of trace zero.
+dim:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
+ws:=[]; //The set of mod p Atkin-Lehner involution(s)
+for M in auts do
+    row:=[&+[RowSequence(M)[i][j]*u[j] : j in [1..dim+1]] : i in [1..dim+1]];
+    Append(~ws,iso<Xp->Xp | row,row>);
+end for;
+VV,phii:=SpaceOfDifferentialsFirstKind(Xp);
+ts:=[hom<VV->VV | [ (Pullback(wp,phii(VV.i)))@@phii -VV.i  : i in [1..Genus(X)] ]> : wp in ws];
+T:=&+[Image(t): t in ts]; //The space of vanishing differentials
+if not p eq 2 then assert Dimension(T) eq Genus(X) - genusC; end if; //cf Remark 3.7.
+omegas:=[phii(T.i) : i in [1..Dimension(T)]]; //A basis of vanishing differentials
+
 
 redL1pb:=[<reduce(X,Xp,DD[1]),reduce(X,Xp,DD[2])> : DD in Lpb];
 redL1npb:=[reduce(X,Xp,DD) : DD in Lnpb];
