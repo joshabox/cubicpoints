@@ -26,7 +26,7 @@ assert &and([not IsPrincipal(Dtors[1]-k*Dtors[2]) : k in [5,25]] cat [not IsPrin
 //The latter shows that <Dtors[1]> and <Dtors[2]> have intersection {0} so J_0(57)(\Q)_{tors} \simeq Z/6Z x Z/30Z.
 
 
-// We use an algorithm due to Stoll to find a generator for the free part of the  MW group of J(X/<w57>). We then lift it to J(X) to obtain a generator of an atmost index two subgroup of J(Q)/J(Q)_tors
+// We use an algorithm due to Stoll to find a generator for the free part of the  MW group of J(X/<w57>). We then lift it to J(X) to obtain a generator of a subgroup of J(Q)/J(Q)_tors with index at most two 
 CG2,projCG2:=CurveQuotient(AutomorphismGroup(X,[w57]));
 SC, simplifier := SimplifiedModel(CG2);
 J := Jacobian(SC);
@@ -261,6 +261,6 @@ I:=2;
 load "cubicsieve.m";
 
 primes:= [];
-smallprimes:=[17,43,47,67,79,181];
+smallprimes:=[17,43];
 assert &and[not IsSingular(ChangeRing(X,GF(p))) : p in smallprimes]; //Sanity check to verify that X has good reduction.
-//MWSieve(deg3pb,deg3npb,smallprimes,X,A,divs,auts,genusC,I,bp);
+MWSieve(deg3pb,deg3npb,smallprimes,X,A,divs,auts,genusC,I,bp);
