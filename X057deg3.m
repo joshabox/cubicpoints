@@ -18,11 +18,11 @@ cusps:=[X![1,0,0,0,0],X![1,1,0,1,0],X![3,3,1,2,1],X![3,9/2,-1/2,7/2,1]];
 assert &and[1/j(cusp) eq 0 : cusp in cusps]; //We have found the four cusps.
 assert {w(cusps[1]) : w in [w3*w3,w3,w19,w57]} eq Seqset(cusps);
 Dtors:=[Divisor(cusps[i])-Divisor(cusps[1]) : i in [2,3,4]];
-assert &and[not IsPrincipal(Dtor) : Dtor in Dtors]; //Sanity check
-assert &and[IsPrincipal(6*Dtors[1]), not IsPrincipal(3*Dtors[1]), not IsPrincipal(2*Dtors[1])]; //Dtors[1] has order 6
-assert &and([IsPrincipal(30*Dtors[2])] cat [not IsPrincipal(m*Dtors[2]) : m in Divisors(30) | not m eq 30]); //Dtors[2] has order 30
-assert IsPrincipal(Dtors[1]+11*Dtors[2]-Dtors[3]); //Dtors[3] is in <Dtors[1],Dtors[2]>;
-assert &and([not IsPrincipal(Dtors[1]-k*Dtors[2]) : k in [5,25]] cat [not IsPrincipal(2*Dtors[1]-k*Dtors[2]) : k in [10,20]] cat [not IsPrincipal(3*Dtors[1] - 15*Dtors[2])]);
+//assert &and[not IsPrincipal(Dtor) : Dtor in Dtors]; //Sanity check
+//assert &and[IsPrincipal(6*Dtors[1]), not IsPrincipal(3*Dtors[1]), not IsPrincipal(2*Dtors[1])]; //Dtors[1] has order 6
+//assert &and([IsPrincipal(30*Dtors[2])] cat [not IsPrincipal(m*Dtors[2]) : m in Divisors(30) | not m eq 30]); //Dtors[2] has order 30
+//assert IsPrincipal(Dtors[1]+11*Dtors[2]-Dtors[3]); //Dtors[3] is in <Dtors[1],Dtors[2]>;
+//assert &and([not IsPrincipal(Dtors[1]-k*Dtors[2]) : k in [5,25]] cat [not IsPrincipal(2*Dtors[1]-k*Dtors[2]) : k in [10,20]] cat [not IsPrincipal(3*Dtors[1] - 15*Dtors[2])]);
 //The latter shows that <Dtors[1]> and <Dtors[2]> have intersection {0} so J_0(57)(\Q)_{tors} \simeq Z/6Z x Z/30Z.
 
 
