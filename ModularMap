@@ -1,0 +1,145 @@
+QuickModCurve:=function(N)
+	gen0:=[1..10] cat [12, 13, 16, 18, 25]; // Values of N for which X_0(N) has genus 0.
+	gen1:=[11, 14, 15, 17, 19, 20, 21, 24, 27, 32, 36, 49]; // Values of N for which X_0(N) has genus 1.
+	hyp:=[37] cat [40,48] cat [22,23,26,28,29,30,31,33,35,39,41,46,47,50,59,71]; // Values of N for which X_0(N) is hyperelliptic.
+	// These values are taken from Ogg's paper, "Hyperelliptic Modular Curves", Bull. Soc. math. France, 102, 1974, p. 449-462.
+	assert #gen0 eq 15;
+	assert #gen1 eq 12;
+	assert #hyp eq 19;
+	assert N in (gen0 cat gen1 cat hyp) eq false;
+	// Thus X_0(N) has genus \ge 3 and is non-hyperelliptic, so the canonical map is an embedding.
+	// We use this to construct the equations for X_0(N).
+	prec:=500;
+	L<q> := LaurentSeriesRing(Rationals(),prec);
+	S:=CuspForms(N);
+	dim:=Dimension(S);
+	if dim eq 3 then
+		R<x_0,x_1,x_2>:=PolynomialRing(Rationals(),dim);
+	elif dim eq 4 then 
+		R<x_0,x_1,x_2,x_3>:=PolynomialRing(Rationals(),dim);
+	elif dim eq 5 then
+		R<x_0,x_1,x_2,x_3,x_4>:=PolynomialRing(Rationals(),dim);
+	else
+		R<[x]>:=PolynomialRing(Rationals(),dim);
+	end if;
+	Bexp:=[L!qExpansion(S.i,prec) : i in [1..dim]];
+	eqns:=[R | ];
+	d:=1;
+	tf:=false;
+	while tf eq false do
+		d:=d+1;
+		mons:=MonomialsOfDegree(R,d);
+		monsq:=[Evaluate(mon,Bexp) : mon in mons];
+		V:=VectorSpace(Rationals(),#mons);
+		W:=VectorSpace(Rationals(),prec-10);
+		h:=hom<V->W | [W![Coefficient(monsq[i],j) : j in [1..(prec-10)]] : i in [1..#mons]]>;
+		K:=Kernel(h);
+		eqns:=eqns cat [ &+[Eltseq(V!k)[j]*mons[j] : j in [1..#mons] ] : k in Basis(K)  ];
+		X:=Scheme(ProjectiveSpace(R),eqns);
+		if Dimension(X) eq 1 then
+			if IsSingular(X) eq false then
+				X:=Curve(ProjectiveSpace(R),eqns);
+				if Genus(X) eq dim then
+					tf:=true;
+				end if;
+			end if;
+		end if;
+	end while;
+	eqns:=GroebnerBasis(ideal<R | eqns>); // Simplifying the equations.
+	tf:=true;
+	repeat
+		t:=#eqns;
+		tf:=(eqns[t] in ideal<R | eqns[1..(t-1)]>);
+		if tf then 
+			Exclude(~eqns,eqns[t]);
+		end if;
+	until tf eq false;
+	t:=0;
+	repeat
+		t:=t+1;
+		tf:=(eqns[t] in ideal<R | Exclude(eqns,eqns[t])>);	
+		if tf then
+			Exclude(~eqns,eqns[t]);
+			t:=0;
+		end if;
+	until tf eq false and t eq #eqns;
+	X:=Curve(ProjectiveSpace(R),eqns); // Our model for X_0(N) discovered via the canonical embedding.
+	assert Genus(X) eq dim;
+	assert IsSingular(X) eq false;
+	// We now check the equations for X rigorously, i.e.
+	// up to the Sturm bound.
+	indexGam:=N*&*[Rationals() | 1+1/p : p in PrimeDivisors(N)];	
+	indexGam:=Integers()!indexGam; // Index of Gamma_0(N) in SL_2(Z)
+	for eqn in eqns do
+		eqnScaled:=LCM([Denominator(c) : c in Coefficients(eqn)])*eqn;
+		wt:=2*Degree(eqn); // Weight of eqn as a cuspform.
+		hecke:=Ceiling(indexGam*wt/12);  // Hecke=Sturm bound.
+										// See Stein's book, Thm 9.18.
+		Bexp1:=[qExpansion(S.i,hecke+10) : i in [1..dim]]; // q-expansions
+                        // of basis for S 
+                        // up to precision hecke+10.
+		assert Valuation(Evaluate(eqnScaled,Bexp1)) gt hecke+1;
+	end for; // We have now checked the correctness of the equations for X.
+// Next we want to write down the matrices for the Atkin-Lehner
+	// operators on X_0(N)
+	alindices:=[ m : m in Divisors(N) | GCD(m,N div m) eq 1 and m gt 1];
+	al:=[AtkinLehnerOperator(S,m) : m in alindices];
+return X,al;
+end function;
+
+
+//This currently needs input from Sage because Sage has an implementation of the q-expansions of the functions defining the modular map.
+//In Sage, write the following:
+/*
+E = EllipticCurve('XXX')
+phi = E.modular_parametrization()
+fg = phi.power_series(200)
+fg
+*/
+L<q>:=LaurentSeriesRing(Rationals(),200);
+//Now just write f:=L!(copy from fg[0]);  g:=L!(copy from fg[1]); fg:=[f,g];
+
+
+//Takes as input an elliptic curve E and a list fg of q-expansions of the functions defining the modular map.
+ModularMap:=function(E,fg)
+f:=fg[1];
+g:=fg[2];
+N:=Conductor(E);
+CN:=CuspForms(N);
+X,al:=QuickModCurve(N); //Equations for X are constructed as equations between the cusp forms in Basis(CN).
+R<[x]>:=CoordinateRing(AmbientSpace(X));
+prec:=200;
+fns:=[L!qExpansion(h,prec) : h in Basis(CN)];
+vseqs:=[];
+//We now write f and g as rational functions in fns.
+monsfg:=[];
+for fnm in [f,g] do
+    tf:=false;
+    d:=0;
+    while tf eq false do
+        d:=d+1;
+        mons:=MonomialsOfDegree(R,d);
+        k:=prec-100;
+        Zk:=FreeAbelianGroup(k);
+        Zm:=VectorSpace(Rationals(),(2*#mons));
+        Zk:=VectorSpace(Rationals(),k+101);
+        h:=hom<Zm -> Zk | [[Coefficient(Evaluate(mons[i],fns)*fnm,j) : j in [-100..k]] : i in [1..#mons]] cat [[Coefficient(Evaluate(-          mons[i],fns),j) : j in [-100..k]] : i in [1..#mons]]>;
+        K:=Kernel(h);
+        for v in Basis(K) do
+        if not &+[Eltseq(v)[j] : j in [1..#mons]] eq 0 and not &+[Eltseq(v)[j+#mons] : j in [1..#mons]] eq 0   then
+        vseq:=Eltseq(v);
+        tf:=true;
+        end if; 
+        end for;
+    end while;
+    Append(~monsfg,mons);
+    Append(~vseqs,vseq);
+end for;
+fgfns:=[FunctionField(X)!(Evaluate(&+[vseqs[j][i+#monsfg[j]]*monsfg[j][i] : i in [1..#monsfg[j]]],x)/Evaluate(&+[vseqs[j][i]*monsfg[j][i] : i in [1..#monsfg[j]]],x)) : j in [1..#vseqs]];
+fgpfs:=<ProjectiveFunction(h) : h in fgfns>;
+fgeqns:=[Numerator(fgpfs[1])*Denominator(fgpfs[2]),Numerator(fgpfs[2])*Denominator(fgpfs[1]),Denominator(fgpfs[1])*Denominator(fgpfs[2])];
+return map<X -> E | fgeqns>;
+end function;
+
+//Example: define E:=EllipticCurve("73a1") here in magma.
+//Then do E = EllipticCurve('73a1') in sage and compute phi and fg. Copy as instructed above and do ModularMap(E,fg). This gives you the degree 3 map X_0(73)->E.
