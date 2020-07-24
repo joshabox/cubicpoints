@@ -176,14 +176,13 @@ return false;
 end function;
 
 
-ALMap := function(X,auts)
+ALMap := function(X,aut)
 R<[u]>:=CoordinateRing(AmbientSpace(X));
 n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
-row:=[&+[RowSequence(auts[1])[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]]; 
-//Note that this function is only called upon for N \neq 57 so #auts = 1
+row:=[&+[RowSequence(aut)[i][j]*u[j] : j in [1..n+1]] : i in [1..n+1]]; 
 return iso<X -> X | row,row>;
 end function;
-eta:=ALMap(X,auts);
+eta:=ALMap(X,auts[1]);
 
 IsOnlyWithFamily:=function(ratpt,pb,X,Xp,p,auts,genusC,omegas)
 Fp:=BaseRing(Xp); Fp2:=GF(p^2);
