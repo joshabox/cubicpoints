@@ -23,12 +23,16 @@ end if;
 return alist;
 end function;
 
-IsLonely:=function(QQ,X,Xp,p,auts,genusC,omegas)
+IsLonely:=function(i,Lnpb,X,Xp,p,auts,genusC,omegas)
+QQ:=Lnpb[i];
+isbadpt:=badpts[i];
 if p le 13 then return false; end if; //Part of first condition in Theorem
 d:=3; //Just there to emphasize that we work on X^{(d)} for d=3.
 Fp:=BaseRing(Xp);
 Rp<[u]>:=CoordinateRing(AmbientSpace(Xp));
 n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
+
+if not isbadpt then
 matrixseq:=[];
 dec:=Decomposition(reduce(X,Xp,QQ));
 Fq:=GF(p^(LCM([Degree(ResidueClassField(dd[1])) : dd in dec])));
@@ -59,7 +63,11 @@ for i in [1..#dec] do
 end for;
 Atilde:=Matrix(matrixseq);
 if Rank(Atilde) eq d then return true;
+else return false;
+end if;
 
+else 
+/*
 elif &and[Rank(Atilde) eq d -1, m ne d,Degree(Fq) eq 1] then
     for k in [1..#tQtildes] do
         omlist:=[ExpandDifferential(om,Qtildes[k],tQtildes[k],m) : om in omegas];
@@ -95,7 +103,9 @@ elif Rank(Atilde) eq d-1 and m eq d then
     else return false;
     end if;
 else return false;
+*/
 end if;
+return false;
 end function;
 
 
@@ -219,7 +229,7 @@ mnjposP:=[];
 for x in imW do
     if not mn(x) in mnjposP then //This if statement is usually not satisfied,thus saving us from a lot of unnecessary work.
     z:=x@@mI; //We reconstruct possible mod p points from their image in JFp, by first taking inverse images under mI.
-    if &or[Dimension(phi(z+k)+bpp) gt 0 and ( (p in [3,7,11,13]) or (not (z+k) in redLnpb cat redLpbsum) or ((z+k) in redLnpb and not IsLonely(Lnpb[Index(redLnpb,z+k)],X,Xp,p,auts,genusC,omegas)) or ((z+k) in redLpbsum and not IsOnlyWithFamily(Lpb[Index(redLpbsum,z+k)][1],Lpb[Index(redLpbsum,z+k)][2],X,Xp,p,auts,genusC,omegas)) ) : k in K] then
+    if &or[Dimension(phi(z+k)+bpp) gt 0 and ( (p in [3,7,11,13]) or (not (z+k) in redLnpb cat redLpbsum) or ((z+k) in redLnpb and not IsLonely(Index(redLnpb,z+k),Lnpb,X,Xp,p,auts,genusC,omegas)) or ((z+k) in redLpbsum and not IsOnlyWithFamily(Lpb[Index(redLpbsum,z+k)][1],Lpb[Index(redLpbsum,z+k)][2],X,Xp,p,auts,genusC,omegas)) ) : k in K] then
         Append(~mnjposP,mn(x)); //Finally we only store the information multiplied by n.
     end if;
     end if;
