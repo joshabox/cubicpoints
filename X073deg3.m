@@ -93,7 +93,7 @@ V,phi:=RiemannRochSpace(bp+3*D1-D2-Dtor);
 excpl2:=Divisor(phi(V.1))+bp+3*D1-D2-Dtor;
 deg3pb:=Setseq({<Place(c),DD> : c in cusps,DD in deg2pb});
 deg3pbsum:=[DD[1]+DD[2] : DD in deg3pb];
-deg3npb:=Setseq({Place(c)+DD : c in cusps, DD in deg2npb | not (Place(c)+DD) in deg3pbsum}) cat [excpl,excpl2];
+deg3npb:=Setseq({Place(c)+DD : c in cusps, DD in deg2npb | not (Place(c)+DD) in deg3pbsum}) cat [excpl,excpl2];  
 
 //Finally, we do the sieve.
 primes:=[];
@@ -103,6 +103,29 @@ divs:=[D1,D2,Dtor];
 genusC:=Genus(C);
 auts:=[al[1]];
 I:=1;
+
+load "Cubicsieve.m";
+
+//We check that indeed the matrix for 3*cusp has rank 2 over the rationals.
+for Q in cusps do
+    tQ:=UniformizingParameter(Place(Q));
+    etas:=[ALMap(X,aut) : aut in auts];
+    V,phii:=SpaceOfDifferentialsFirstKind(X);
+    ts:=[hom<V->V | [ (Pullback(eta,phii(V.i)))@@phii -V.i  : i in [1..Genus(X)] ]> : eta in etas];
+    T:=&+[Image(t) : t in ts]; //The space of ann. diffs. of trace zero.
+    omegas:=[phii(T.i) : i in [1..Dimension(T)]]; //A list of lin. indep. ann. diffs. of trace zero.
+    M:=Matrix([ExpandDifferential(om,Q,tQ,2) : om in omegas]);
+    assert Ncols(M) eq 3 and Nrows(M) eq 3;
+    assert Rank(M) eq 2;
+ end for;
+ 
+ badpts:=[];
+ for Q in deg3npb do
+    if not Q in [3*Place(cusps[1]),3*Place(cusps[2])] then
+        Append(~badpts,false);
+        else Append(~badpts,true);
+    end if;
+ end for;
 
 /*for p in primes do
     p;
@@ -115,7 +138,7 @@ I:=1;
     Factorization(#JFp);
 end for;*/
 
-load "Cubicsieve.m";
 
-MWSieve(deg3pb,deg3npb,smallprimes,X,A,divs,auts,genusC,I,bp);
+
+MWSieve(deg3pb,deg3npb,badpts,smallprimes,X,A,divs,auts,genusC,I,bp);
 
