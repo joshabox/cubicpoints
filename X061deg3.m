@@ -61,10 +61,11 @@ rationalpts:=[Place(cusp) : cusp in cusps];
 auts:=[al[1]];
 I:=2;
 load "Cubicsieve.m";
+badpts:=[false : i in deg3npb];
 
 smallprimes:=[31,19,53,23];
 primes:=[];
 assert &and[not IsSingular(ChangeRing(X,GF(p))) : p in smallprimes];
 
-MWSieve(deg3pb,deg3npb,smallprimes,X,A,divs,auts,genusC,I,bp);
+MWSieve(deg3pb,deg3npb,badpts,smallprimes,X,A,divs,auts,genusC,I,bp);
 
