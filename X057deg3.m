@@ -298,4 +298,4 @@ for QQ in [deg3npb[21]] cat [Pullback(w,deg3npb[21]) : w in [w3,w19,w57]] do
 primes:= [];
 smallprimes:=[17,43];
 assert &and[not IsSingular(ChangeRing(X,GF(p))) : p in smallprimes]; //Sanity check to verify that X has good reduction.
-MWSieve(deg3pb,deg3npb,smallprimes,X,A,divs,auts,genusC,I,bp);
+MWSieve(deg3pb,deg3npb,badpts,smallprimes,X,A,divs,auts,genusC,I,bp);
