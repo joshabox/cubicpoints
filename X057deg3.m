@@ -260,31 +260,34 @@ auts:=[al[1],al[2]];
 I:=2;
 load "cubicsieve.m";
 
-/* We need to check that the matrix over Q has rank 2. Started attempt at writing that, not finished. 
+// We need to check that the matrix over Q has rank 2. 
 etas:=[ALMap(X,aut) : aut in auts];
 V,phii:=SpaceOfDifferentialsFirstKind(X);
 ts:=[hom<V->V | [ (Pullback(eta,phii(V.i)))@@phii -V.i  : i in [1..Genus(X)] ]> : eta in etas];
 T:=&+[Image(t) : t in ts]; //The space of ann. diffs. of trace zero.
  omegas:=[phii(T.i) : i in [1..Dimension(T)]]; //A list of lin. indep. ann. diffs. of trace zero.
  K:=ResidueClassField(Decomposition(deg3npb[21])[2][1]);
- XK:=ChangeRing(X,K);
- RK<[xK]>:=CoordinateRing(AmbientSpace(XK));
+ sigma:=Automorphisms(K)[2];
 for QQ in [deg3npb[21]] cat [Pullback(w,deg3npb[21]) : w in [w3,w19,w57]] do
     QQrows:=[];
     decQQ:=Decomposition(QQ);
     for P in [d[1] : d in decQQ] do
-    PK:=Divisor(XK,ideal<CoordinateRing(AmbientSpace(XK)) | [Evaluate(e,xK) : e in Generators(Ideal(P))]>);
-    for PP in [d[1] : d in Decomposition(PK)] do
-    Q := X(K)!Eltseq(RepresentativePoint(PP));
+    Q := RepresentativePoint(P);
+    if Degree(P) eq 2 then
+    tf,phi:=IsIsomorphic(ResidueClassField(P),K);
+    else phi:=IdentityHomomorphism(Rationals());
+    end if;
+    for k in [1..Degree(P)] do
+    Q:=X(K)![(sigma^k)(phi(a)) : a in Eltseq(Q)];
     tQ:=UniformizingParameter(P);
     Append(~QQrows,[K!ExpandDifferential(om,Q,tQ,0)[1] : om in omegas]);
-    end for;
+   end for;
     end for;
     M:=Matrix(QQrows);
     assert Ncols(M) eq 4 and Nrows(M) eq 3 and Rank(M) eq 2;
     assert Rank(M) eq 2;
  end for;
- */
+
  
  badpts:=[];
  for Q in deg3npb do
