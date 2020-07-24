@@ -23,16 +23,30 @@ end if;
 return alist;
 end function;
 
-IsLonely:=function(i,Lnpb,X,Xp,p,auts,genusC,omegas)
-QQ:=Lnpb[i];
-isbadpt:=badpts[i];
-if p le 13 then return false; end if; //Part of first condition in Theorem
-d:=3; //Just there to emphasize that we work on X^{(d)} for d=3.
+//How to write a sum z1^n+...+zk^n in terms of z1+..+zk,...,z1^k+...+zk^k.
+//Implemented the ``stupid way'' by solving the linear equations in the monomials.
+spoly:=function(n,k)
+P<[s]>:=PolynomialRing(Rationals(),[1..k]);
+Q<[z]>:=PolynomialRing(Rationals(),k);
+sn:=&+[z[i]^n : i in [1..k]];
+sis:=[&+[z[i]^j : i in [1..k]] : j in [1..k]];
+mons:=MonomialsOfWeightedDegree(P,n);
+monsev:=[Evaluate(m,sis) : m in mons];
+monsQ:=MonomialsOfDegree(Q,n);
+M:=#mons;
+N:=#monsQ;
+QM:=VectorSpace(Rationals(),M);
+QN:=VectorSpace(Rationals(),N);
+h:=hom<QM -> QN | [QN![MonomialCoefficient(mm,m) : m in monsQ] : mm in monsev]>;
+sncfs:=QN![MonomialCoefficient(sn,m) : m in monsQ];
+sol:=sncfs@@h;
+return &+[sol[i]*mons[i] : i in [1..#mons]];
+end function;
+
+ComputeAtilde:=function(QQ,X,Xp,p,auts,genusC,omegas)
 Fp:=BaseRing(Xp);
 Rp<[u]>:=CoordinateRing(AmbientSpace(Xp));
 n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
-
-if not isbadpt then
 matrixseq:=[];
 dec:=Decomposition(reduce(X,Xp,QQ));
 Fq:=GF(p^(LCM([Degree(ResidueClassField(dd[1])) : dd in dec])));
@@ -61,12 +75,65 @@ for i in [1..#dec] do
         end for;
     end for;
 end for;
-Atilde:=Matrix(matrixseq);
+return Matrix(matrixseq);
+end function;
+
+IsLonely:=function(i,Lnpb,badpts,X,Xp,p,auts,genusC,omegas)
+QQ:=Lnpb[i];
+isbadpt:=badpts[i];
+if p le 13 then return false; end if; //Part of first condition in Theorem
+d:=3; //Just there to emphasize that we work on X^{(d)} for d=3.
+Fp:=BaseRing(Xp);
+Rp<[u]>:=CoordinateRing(AmbientSpace(Xp));
+n:=Dimension(AmbientSpace(X)); //Assuming X is given in projective space
+
+if not isbadpt then
+Atilde:=ComputeAtilde(QQ,X,Xp,p,auts,genusC,omegas);
 if Rank(Atilde) eq d then return true;
 else return false;
 end if;
 
 else 
+dec:=Decomposition(QQ);
+Atilde:=ComputeAtilde(QQ,X,Xp,p,auts,genusC,omegas);
+Btilde:=ComputeAtilde(2*QQ,X,Xp,p,auts,genusC,omegas);
+//We want to do column operations (changing basis of van. diffs.) to make the right-hand #omegas-(d-1) of the columns of Atilde vanish
+B:=Basis(Kernel(Transpose(Atilde)));
+assert #B eq #omegas-(d-1);
+colinds:=[I : I in CartesianPower([1..Ncols(Atilde)],d-1) | #{i : i in I} eq #I and Rank(Submatrix(Atilde,[1..Nrows(Atilde)],[i : i in I])) eq d-1];
+rsBtilde:=[Vector(v) : v in RowSequence(Transpose(Btilde))];
+newcols:=[rsBtilde[i] : i in colinds[1]] cat [&+[b[i]*rsBtilde[i] : i in [1..#Eltseq(b)]] : b in B];
+Ctilde:=Transpose(Matrix(newcols));
+assert [Nrows(Ctilde),Ncols(Ctilde),Rank(Ctilde)] eq [Nrows(Btilde),Ncols(Btilde),Rank(Btilde)];
+
+if &and[dec[i][2] eq 1 : i in [1..#dec]] then
+Fq:=Parent(Atilde[1,1]);
+P<pi,z1,z2,z3>:=PolynomialRing(Fq,4);
+zvector:=[z1,z1^2,z2,z2^2,z3,z3^2];
+Fs:=[&+[Ctilde[j,i]*zvector[j] : j in [1..2*d]] : i in [1..#omegas]];
+pivals:=[1 : i in [1..d-1]] cat [2 : i in [1..#omegas-(d-1)]];
+Gs:=[Evaluate(Fs[i],[pi,pi*z1,pi*z2,pi*z3]) div pi^pivals[i] : i in [1..#Fs]];
+A<[x]>:=AffineSpace(Fq,3);
+Fqq:=GF(p^6);
+Embed(Fq,Fqq);
+S:=Scheme(A,[Evaluate(G,[0] cat x) : G in Gs]);
+if #Points(S,Fqq) eq 1 then return true; 
+else return false;
+end if;
+
+elif &and[dec[i][2] eq 3 : i in [1..#dec]] then
+P<pi,s1,s2,s3>:=PolynomialRing(Fp,4);
+Fs:=[&+[newcols[k][i]*i^-1*Evaluate(spoly(i,3),[pi*s1,pi*s2,pi*s3]) : i in [1..#Eltseq(newcols[k])]] : k in [1..#newcols]];
+pivals:=[1 : i in [1..d-1]] cat [2 : i in [1..#omegas-(d-1)]];
+Gs:=[Fs[i] div pi^(pivals[i]) : i in [1..#Fs]];
+A<[x]>:=AffineSpace(Fp,3);
+S:=Scheme(A,[Evaluate(G,[0] cat x) : G in Gs]);
+if #Points(S,Fq) eq 1 then return true;
+else return false;
+end if;
+
+end if;
+
 /*
 elif &and[Rank(Atilde) eq d -1, m ne d,Degree(Fq) eq 1] then
     for k in [1..#tQtildes] do
@@ -176,7 +243,7 @@ else return false;
 end if;
 end function;
 
-ChabautyInfo:=function(Lpb,Lnpb,p,X,auts,genusC,A,B,iA,W,divs,I,bp)
+ChabautyInfo:=function(Lpb,Lnpb,badpts,p,X,auts,genusC,A,B,iA,W,divs,I,bp)
 Fp:=GF(p); Fp2:=GF(p^2);
 Xp:=ChangeRing(X,Fp);
 Rp<xp,yp,zp>:=CoordinateRing(AmbientSpace(Xp));
@@ -229,7 +296,7 @@ mnjposP:=[];
 for x in imW do
     if not mn(x) in mnjposP then //This if statement is usually not satisfied,thus saving us from a lot of unnecessary work.
     z:=x@@mI; //We reconstruct possible mod p points from their image in JFp, by first taking inverse images under mI.
-    if &or[Dimension(phi(z+k)+bpp) gt 0 and ( (p in [3,7,11,13]) or (not (z+k) in redLnpb cat redLpbsum) or ((z+k) in redLnpb and not IsLonely(Index(redLnpb,z+k),Lnpb,X,Xp,p,auts,genusC,omegas)) or ((z+k) in redLpbsum and not IsOnlyWithFamily(Lpb[Index(redLpbsum,z+k)][1],Lpb[Index(redLpbsum,z+k)][2],X,Xp,p,auts,genusC,omegas)) ) : k in K] then
+    if &or[Dimension(phi(z+k)+bpp) gt 0 and ( (p in [3,7,11,13]) or (not (z+k) in redLnpb cat redLpbsum) or ((z+k) in redLnpb and not IsLonely(Index(redLnpb,z+k),Lnpb,badpts,X,Xp,p,auts,genusC,omegas)) or ((z+k) in redLpbsum and not IsOnlyWithFamily(Lpb[Index(redLpbsum,z+k)][1],Lpb[Index(redLpbsum,z+k)][2],X,Xp,p,auts,genusC,omegas)) ) : k in K] then
         Append(~mnjposP,mn(x)); //Finally we only store the information multiplied by n.
     end if;
     end if;
@@ -247,7 +314,7 @@ W:=[x : x in W | h(x) in mnjposP];
 return W,B,iA; 
 end function;
 
-MWSieve:=function(Lpb,Lnpb,smallprimes,X,A,divs,auts,genusC,I,bp)
+MWSieve:=function(Lpb,Lnpb,badpts,smallprimes,X,A,divs,auts,genusC,I,bp)
 print "Welcome to our sieve.";
 print "If I return true then all points are known.";
 
@@ -259,7 +326,7 @@ W:={0*A.1}; // This will be our set of possible B-cosets in A. Will grow.
 // multiplication by integer I such that I*J(X)(\Q) \subset A.
 for p in smallprimes do
 print "We consider the prime"; p;
-W,B,iA:=ChabautyInfo(Lpb,Lnpb,p,X,auts,genusC,A,B,iA,W,divs,I,bp);
+W,B,iA:=ChabautyInfo(Lpb,Lnpb,badpts,p,X,auts,genusC,A,B,iA,W,divs,I,bp);
 print "The number of cosets in J(X)(Q) where unknown points can land is"; #W;
 smallsols:=[w : w in W | &+[AbsoluteValue(Integers()!a) : a in Eltseq(w)] lt 100];
 if #smallsols gt 0 then smallsols; end if;
