@@ -128,7 +128,7 @@ pivals:=[1 : i in [1..d-1]] cat [2 : i in [1..#omegas-(d-1)]];
 Gs:=[Fs[i] div pi^(pivals[i]) : i in [1..#Fs]];
 A<[x]>:=AffineSpace(Fp,3);
 S:=Scheme(A,[Evaluate(G,[0] cat x) : G in Gs]);
-if #Points(S,Fq) eq 1 then return true;
+if #Points(S,Fp) eq 1 then return true;
 else return false;
 end if;
 
