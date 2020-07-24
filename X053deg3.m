@@ -83,9 +83,10 @@ divs:=[D1,Dtor];
 genusC:=Genus(C);
 auts:=[al[1]];
 I:=2;
+badpts:=[false : i in deg3npb];
 
 load "Cubicsieve.m";
 primes:=[];
 smallprimes:=[31,17];
-MWSieve(deg3pb,deg3npb,smallprimes,X,A,divs,auts,genusC,I,bp);
+MWSieve(deg3pb,deg3npb,badpts,smallprimes,X,A,divs,auts,genusC,I,bp);
 
