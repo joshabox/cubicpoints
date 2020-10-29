@@ -235,17 +235,58 @@ I313:=ideal<CoordinateRing(AmbientSpace(X)) |
 
 II := [I31,I32,I33,I34,I35,I36,I37,I38,I39,I310,I311,I312,I313];
 
-/*
-// Assert none of the above cubic points are CM points
-for I in II do
-E := EllipticCurveFromjInvariant(j(RepresentativePoint(Place(X,I))));
-Assert not HasComplexMultiplication(E);
-end for;
-*/
 
 // Degree 3 pts
 deg3npb:=[3*Place(c) : c in cusps] cat [1*Place(c) + DD : c in cusps, DD in deg2npb] cat [Divisor(X,I): I in II];
 deg3pb:=[];
+
+ disc116 := [Divisor(X,I): I in [I35,I38,I39,I311]];
+ disc3299 := [Divisor(X,I): I in [I31,I34,I310,I312, I313]];
+ disc139 := [Divisor(X,I): I in [I32,I33,I36,I37]];
+
+R<t> := PolynomialRing(Rationals());
+K<a> := NumberField(R![2, 1, -1, 1]); ///cubic field with discriminant = -139
+
+// We now express all representatives of all degree 3 points.
+for DDD in disc139 do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+end for;
+
+K<a> := NumberField(R![-2, 0, -1, 1]); ///cubic field with discriminant = -116
+
+for DDD in disc116 do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+end for;
+
+K<a> := NumberField(R![ -27, -16, 0, 1 ]); 
+
+for DDD in disc3299 do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+end for;
+
+
+
 
 
 //Finally, we do the sieve.
