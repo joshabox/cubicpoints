@@ -47,11 +47,30 @@ bp:=2*Place(infcusp)+Place(cusp2);
 deg3pb:=[<Place(cusp2),Place(cusp2)+Place(infcusp)>,<Place(infcusp),Place(infcusp)+Place(cusp2)>] cat [<Place(pt),Pullback(XtoE,Place(n*QE))> : pt in cusps, n in [-24..24]];
 //For the current implementation of the sieve, it's important that the combinations of cusps come first. It's okay if they occur twice.
 deg3npb:=[3*Place(cusp2),3*Place(infcusp)];
+excDs := [];
 for nn in [[1,-1],[1,2]] do
 V,phi:=RiemannRochSpace(bp+nn[1]*D1+nn[2]*Dtor);
 Append(~deg3npb,Divisor(phi(V.1))+bp+nn[1]*D1+nn[2]*Dtor);
+Append(~excDs,Divisor(phi(V.1))+bp+nn[1]*D1+nn[2]*Dtor);
 assert #Decomposition(deg3npb[#deg3npb]) eq 1;
 end for;
+
+R<t> := PolynomialRing(Rationals());
+K<a> := NumberField(R![-20, -2, 0, 1]); ///cubic field with discriminant = -4*673
+
+// We now express all representatives of all degree 3 points.
+for DDD in excDs do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+Factorisation(Integers()!Norm(phi(j(Pt))));
+HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+end for;
+
 
 //Finally, we do the sieve.
 A:=AbelianGroup([0,5]);
