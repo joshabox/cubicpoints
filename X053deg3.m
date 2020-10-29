@@ -76,6 +76,76 @@ deg3npb:=[3*Place(cusps[1]),3*Place(cusps[2])] cat [Divisor(X,I1),Divisor(X,I2)]
 
 assert not IsSingular(ChangeRing(X,GF(17))) and not IsSingular(ChangeRing(X,GF(31)));
 
+
+R<t> := PolynomialRing(Rationals());
+K<a> := NumberField(R![52, 5, -1, 1]); ///cubic field with discriminant = -3.5.5197
+
+// We now express all representatives of all degree 3 points.
+for DDD in [Divisor(X,I1),Divisor(X,I2)] do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+end for;
+
+K<a> := NumberField(R![-8, 11, 0, 1]); ///cubic field with discriminant -1763 = -41.43
+
+for DDD in [extraDs[1],extraDs[8]] do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+end for;
+
+K<a> := NumberField(R![147, 53, -1, 1]); // cubic field of discriminant -328948
+
+for DDD in [extraDs[2],extraDs[7]] do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+end for;
+
+K<a> := NumberField(R![-3, -2, 0, 1]); // cubic field of discriminant -211
+
+for DDD in [extraDs[3],extraDs[6]] do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+end for;
+
+K<a> := NumberField(R![-4, -3, 0, 1]); // cubic field of discriminant -324
+
+for DDD in [extraDs[4],extraDs[5]] do
+"Next point";
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+end for;
+
+
+
 //Finally, we do the sieve.
 rationalpts:=[Place(c) : c in cusps];
 A:=AbelianGroup([0,13]);
