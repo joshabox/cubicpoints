@@ -95,6 +95,19 @@ deg3pb:=Setseq({<Place(c),DD> : c in cusps,DD in deg2pb});
 deg3pbsum:=[DD[1]+DD[2] : DD in deg3pb];
 deg3npb:=Setseq({Place(c)+DD : c in cusps, DD in deg2npb | not (Place(c)+DD) in deg3pbsum}) cat [excpl,excpl2];  
 
+R<t> := PolynomialRing(Rationals());
+K<a> := NumberField(R![ 8, 7, -1, 1 ]);
+
+for DDD in [excpl,excpl2] do
+Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
+F := Parent(Pt[1]);
+tf, phi := IsIsomorphic(F,K);
+assert tf;
+X(K)![phi(coef): coef in Eltseq(Pt)];
+phi(j(Pt));
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+end for;
+
 //Finally, we do the sieve.
 primes:=[];
 smallprimes:=[19,41,59,43,13,103];
