@@ -67,7 +67,7 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
 end for;
 
 
