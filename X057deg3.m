@@ -1,5 +1,4 @@
 //X_0(57). 
- //The space of ann. diffs. of trace zero. seems to have dimension 3 rather than 4 as we would expect. Okay, but we shouldn't actually care about these at all right?
 load "ozmansiksek.m";
 
 X,Z,phi,j,al,jd:=modeqns(57,19); //Just a few seconds.
