@@ -89,7 +89,7 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
 end for;
 
 K<a> := NumberField(R![-8, 11, 0, 1]); ///cubic field with discriminant -1763 = -41.43
@@ -102,7 +102,7 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
 end for;
 
 K<a> := NumberField(R![147, 53, -1, 1]); // cubic field of discriminant -328948
@@ -115,7 +115,7 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
 end for;
 
 K<a> := NumberField(R![-3, -2, 0, 1]); // cubic field of discriminant -211
@@ -128,7 +128,7 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
 end for;
 
 K<a> := NumberField(R![-4, -3, 0, 1]); // cubic field of discriminant -324
@@ -141,7 +141,7 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
 end for;
 
 
