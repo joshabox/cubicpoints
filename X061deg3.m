@@ -67,7 +67,6 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-Factorisation(Integers()!Norm(phi(j(Pt))));
 HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
 end for;
 
