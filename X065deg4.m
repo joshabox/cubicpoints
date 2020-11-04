@@ -150,10 +150,6 @@ Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
 F := Parent(Pt[1]);
 tf, phi := IsIsomorphic(F,K);
 assert tf;
-for coef in Eltseq(Pt) do
-phi(coef);
-end for;
-Pt;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
 HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
