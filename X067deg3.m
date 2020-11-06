@@ -114,14 +114,13 @@ Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
 F := Parent(Pt[1]);
 tf, phi := IsIsomorphic(F,K);
 assert tf;
-for coef in Eltseq(Pt) do
-phi(coef);
-end for;
-Pt;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
-end for;
+EPt := EllipticCurveFromjInvariant(j(Pt));
+assert not HasComplexMultiplication(EPt);
+L := NormalClosure(F);
+GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
+assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];end for;
 
 K<a> := NumberField(R![5, -3, -1, 1]);
 
@@ -131,13 +130,9 @@ Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
 F := Parent(Pt[1]);
 tf, phi := IsIsomorphic(F,K);
 assert tf;
-for coef in Eltseq(Pt) do
-phi(coef);
-end for;
-Pt;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
 end for;
 
 
