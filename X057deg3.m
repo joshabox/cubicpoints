@@ -255,7 +255,11 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+EPt := EllipticCurveFromjInvariant(j(Pt));
+assert not HasComplexMultiplication(EPt);
+L := NormalClosure(F);
+GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
+assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 K<a> := NumberField(R![-2, 0, -1, 1]); ///cubic field with discriminant = -116
@@ -268,7 +272,11 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));// As Q(root(-83)) has class number 3 with Hilbert class field K(root(-83)), I'm quite surprised this comes back false.
+EPt := EllipticCurveFromjInvariant(j(Pt));
+assert not HasComplexMultiplication(EPt);
+L := NormalClosure(F);
+GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
+assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 K<a> := NumberField(R![ -27, -16, 0, 1 ]); 
@@ -281,7 +289,11 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-assert not HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+EPt := EllipticCurveFromjInvariant(j(Pt));
+assert not HasComplexMultiplication(EPt);
+L := NormalClosure(F);
+GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
+assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 
