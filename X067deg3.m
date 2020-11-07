@@ -120,7 +120,8 @@ EPt := EllipticCurveFromjInvariant(j(Pt));
 assert not HasComplexMultiplication(EPt);
 L := NormalClosure(F);
 GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];end for;
+assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+end for;
 
 K<a> := NumberField(R![5, -3, -1, 1]);
 
