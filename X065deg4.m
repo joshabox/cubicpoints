@@ -29,8 +29,7 @@ JF7:=Kernel(degr); // This is isomorphic to J_X(\F_7).
 redDtors:=[JF7!psi(reduce(X,X7,DD)) : DD in Dtors];
 A:=sub<JF7 | redDtors>; //This is isomorphic to J_X(\Q)_{tors}.
 B:=AbelianGroup([2,84]);
-tf,isomm:=IsIsomorphic(A,B);
-assert tf; 
+tf,isomm:=IsIsomorphic(A,B); assert tf;
 assert &and[isomm(A.i) eq B.i : i in [1,2]]; //So A = Z/2Z x Z/84Z with A.1, A.2 being the generators
 Z3:=FreeAbelianGroup(3);
 hh:=hom<Z3-> A | redDtors>;
@@ -43,7 +42,6 @@ C,projC:=CurveQuotient(AutomorphismGroup(X,[w65]));
 Eprime,hprime:=EllipticCurve(C,projC(cusps[1]));
 E,h:=SimplifiedModel(Eprime);
 XtoE:=Expand(projC*hprime*h);
-E;
 assert Conductor(E) eq 65;
 MWE,phi,tf1,tf2:=MordellWeilGroup(E);
 assert tf1; assert tf2; //This shows MWE is computed provably.
@@ -54,9 +52,7 @@ assert DD eq Place(cusps[3])+Place(cusps[4]); //The pullback of the divisor phi(
 seqQE:=[QQ : QQ in [phi(MWE.2),phi(-MWE.2)] | QQ eq E![1,0,1]];
 QE:=seqQE[1]; //QE is the claimed point.
 
-
-
-//We use this generator to find the free generator of J_0(43)(\Q)
+//We use this generator to find the free generator of J_0(65)(\Q)
 D:=Pullback(XtoE,Place(QE));
 bp:=Pullback(XtoE,Place(Zero(E)));
 bp4 := 2*bp;
@@ -66,6 +62,35 @@ K1<r>:=QuadraticField(-1);
 assert r^2 eq -1;
 PP:=(X(K1)![0,1,1/2*(1+r),1,1]);
 assert 1*Place(PP) eq D; //This shows the generator is as claimed.
+
+//Next, we show that <D1,Dtors[1],Dtors[2]> is the full MW group, and does not have index 2. 
+m2:=hom<JF7 -> JF7 | [2*g : g in OrderedGenerators(JF7)]>;
+redD1:=JF7!psi(reduce(X,X7,D1));
+assert &and[not redDtors[1]+redD1 in Image(m2), not redDtors[2]+redD1 in Image(m2), not redDtors[1]+redDtors[2]+redD1 in Image(m2)];
+//This leaves only D1 as a possible candidate for being a double. 
+Q5:=QuadraticField(5);
+EQ5:=ChangeRing(E,Q5);
+MWE5,phi5,tf1,tf2:=MordellWeilGroup(EQ5);
+assert IsIsomorphic(MWE5,AbelianGroup([2,0]));
+assert 2*phi5(MWE5.1) eq Zero(EQ5);
+assert phi5(MWE5.2)[3] eq 1 and not phi5(MWE5.2)[1] in Rationals(); //phi5(MWE5.2) is not a rational point
+assert Eltseq(2*phi5(MWE5.2)) in [Eltseq(QE),Eltseq(-QE)]; //2*phi5(MWE5.2) = QE
+OQ5:=MaximalOrder(Q5);
+assert #Factorization(11*OQ5) eq 2 and #Factorization(19*OQ5) eq 2; //11, 19 split in Q5
+X11:=ChangeRing(X,GF(11));
+C,phi,psi:=ClassGroup(X11);
+degr:=hom<C->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(C)]>;
+JF11:=Kernel(degr); // This is isomorphic to J_X(\F_7).
+X19:=ChangeRing(X,GF(19));
+C,phi,psi:=ClassGroup(X19);
+degr:=hom<C->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(C)]>;
+JF19:=Kernel(degr); // This is isomorphic to J_X(\F_7)
+assert not IsSingular(X11) and not IsSingular(X19);
+assert IsIsomorphic(JF11,AbelianGroup([2,2^2*3*5*7^2*37]));
+assert IsIsomorphic(JF19,AbelianGroup([2*3*23,2^2*3*7*13*23]));
+
+
+
 
 
 //We compute quadratic points on X via rational points on E. 
