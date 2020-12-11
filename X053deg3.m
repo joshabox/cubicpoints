@@ -93,7 +93,9 @@ EPt := EllipticCurveFromjInvariant(j(Pt));
 assert not HasComplexMultiplication(EPt);
 L := NormalClosure(F);
 GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
+assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
+assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 K<a> := NumberField(R![-8, 11, 0, 1]); ///cubic field with discriminant -1763 = -41.43
@@ -110,7 +112,9 @@ EPt := EllipticCurveFromjInvariant(j(Pt));
 assert not HasComplexMultiplication(EPt);
 L := NormalClosure(F);
 GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
+assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
+assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 K<a> := NumberField(R![147, 53, -1, 1]); // cubic field of discriminant -328948
@@ -127,7 +131,9 @@ EPt := EllipticCurveFromjInvariant(j(Pt));
 assert not HasComplexMultiplication(EPt);
 L := NormalClosure(F);
 GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
+assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
+assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 K<a> := NumberField(R![-3, -2, 0, 1]); // cubic field of discriminant -211
@@ -144,7 +150,9 @@ EPt := EllipticCurveFromjInvariant(j(Pt));
 assert not HasComplexMultiplication(EPt);
 L := NormalClosure(F);
 GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
+assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
+assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 K<a> := NumberField(R![-4, -3, 0, 1]); // cubic field of discriminant -324
@@ -161,7 +169,9 @@ EPt := EllipticCurveFromjInvariant(j(Pt));
 assert not HasComplexMultiplication(EPt);
 L := NormalClosure(F);
 GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
+assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
+assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 
