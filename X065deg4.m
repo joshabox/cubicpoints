@@ -181,7 +181,9 @@ EPt := EllipticCurveFromjInvariant(j(Pt));
 assert not HasComplexMultiplication(EPt);
 L := NormalClosure(F);
 GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-assert not &and[Conductor(EPt) eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
+assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
+assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
 end for;
 
 NewDivs := [Divisor(X,I): I in deg4npbnew];
