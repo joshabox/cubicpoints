@@ -209,7 +209,12 @@ tf, phi := IsIsomorphic(F, K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-HasComplexMultiplication(EllipticCurveFromjInvariant(j(Pt)));
+tf, D := CMorQcurve(j(Pt));
+if tf then
+"Has CM by", D;
+else assert not tf;
+"Is not a Q-curve";
+end if;
 end for;
 end for;
 
