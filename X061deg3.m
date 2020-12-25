@@ -55,6 +55,8 @@ Append(~excDs,Divisor(phi(V.1))+bp+nn[1]*D1+nn[2]*Dtor);
 assert #Decomposition(deg3npb[#deg3npb]) eq 1;
 end for;
 
+load "Qcurvetest.m";
+
 R<t> := PolynomialRing(Rationals());
 K<a> := NumberField(R![-20, -2, 0, 1]); ///cubic field with discriminant = -4*673
 
