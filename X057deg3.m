@@ -234,6 +234,7 @@ I313:=ideal<CoordinateRing(AmbientSpace(X)) |
 
 II := [I31,I32,I33,I34,I35,I36,I37,I38,I39,I310,I311,I312,I313];
 
+load "Qcurvetest.m";
 
 // Degree 3 pts
 deg3npb:=[3*Place(c) : c in cusps] cat [1*Place(c) + DD : c in cusps, DD in deg2npb] cat [Divisor(X,I): I in II];
@@ -255,13 +256,12 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-EPt := EllipticCurveFromjInvariant(j(Pt));
-assert not HasComplexMultiplication(EPt);
-L := NormalClosure(F);
-GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
-assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
-assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+tf, D := CMorQcurve(j(Pt));
+if tf then
+"Has CM by", D;
+else assert not tf;
+"Is not a Q-curve";
+end if;
 end for;
 
 K<a> := NumberField(R![-2, 0, -1, 1]); ///cubic field with discriminant = -116
@@ -274,13 +274,12 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-EPt := EllipticCurveFromjInvariant(j(Pt));
-assert not HasComplexMultiplication(EPt);
-L := NormalClosure(F);
-GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
-assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
-assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+tf, D := CMorQcurve(j(Pt));
+if tf then
+"Has CM by", D;
+else assert not tf;
+"Is not a Q-curve";
+end if;
 end for;
 
 K<a> := NumberField(R![ -27, -16, 0, 1 ]); 
@@ -293,13 +292,12 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-EPt := EllipticCurveFromjInvariant(j(Pt));
-assert not HasComplexMultiplication(EPt);
-L := NormalClosure(F);
-GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
-assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
-assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+tf, D := CMorQcurve(j(Pt));
+if tf then
+"Has CM by", D;
+else assert not tf;
+"Is not a Q-curve";
+end if;
 end for;
 
 
