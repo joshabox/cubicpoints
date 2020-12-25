@@ -67,13 +67,12 @@ tf, phi := IsIsomorphic(F,K);
 assert tf;
 X(K)![phi(coef): coef in Eltseq(Pt)];
 phi(j(Pt));
-EPt := EllipticCurveFromjInvariant(j(Pt));
-assert not HasComplexMultiplication(EPt);
-L := NormalClosure(F);
-GaloisConjugates :=[X(L)![sigma(coef): coef in Eltseq(Pt)]: sigma in Automorphisms(L)];
-CondEPt := Conductor(EllipticCurveFromjInvariant(j(GaloisConjugates[1])));
-assert &and[Parent(CondEPt) eq Parent(Conductor(EllipticCurveFromjInvariant(j(sigmaPt)))): sigmaPt in GaloisConjugates]; // sanity check
-assert not &and[CondEPt eq Conductor(EllipticCurveFromjInvariant(j(sigmaPt))): sigmaPt in GaloisConjugates];
+tf, D := CMorQcurve(j(Pt));
+if tf then
+"Has CM by", D;
+else assert not tf;
+"Is not a Q-curve";
+end if;
 end for;
 
 
