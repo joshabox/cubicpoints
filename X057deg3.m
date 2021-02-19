@@ -167,7 +167,14 @@ I36:=ideal<CoordinateRing(AmbientSpace(X)) |
     x[3] - x[4] + 4*x[5]
 ]>;
 
-
+I37:=ideal<CoordinateRing(AmbientSpace(X)) |
+[
+    x[2]^2 - x[2]*x[5] - 4*x[4]*x[5] + 5*x[5]^2,
+    x[2]*x[4] - x[4]*x[5] - x[5]^2,
+    x[2]*x[5] - 4*x[4]^2 + 5*x[4]*x[5],
+    x[1] - x[4] - x[5],
+    x[3] - x[4] + x[5]
+]>;
 I38:=ideal<CoordinateRing(AmbientSpace(X)) |
 [
     x[1]^2 - 3*x[1]*x[5] + 2*x[4]*x[5] - 2*x[5]^2,
@@ -224,7 +231,7 @@ I313:=ideal<CoordinateRing(AmbientSpace(X)) |
 
 
 
-II := [I31,I32,I33,I34,I35,I36,I38,I39,I310,I311,I312,I313];
+II := [I31,I32,I33,I34,I35,I36,I37,I38,I39,I310,I311,I312,I313];
 
 load "Qcurvetest.m";
 
@@ -233,8 +240,8 @@ deg3npb:=[3*Place(c) : c in cusps] cat [1*Place(c) + DD : c in cusps, DD in deg2
 deg3pb:=[];
 
  disc116 := [Divisor(X,I): I in [I35,I38,I39,I311]];
- disc3299 := [Divisor(X,I): I in [I31,I34,I310,I312, I313]];
- disc139 := [Divisor(X,I): I in [I32,I33,I36]];
+ disc3299 := [Divisor(X,I): I in [I31,I34,I310,I312]];
+ disc139 := [Divisor(X,I): I in [I32,I33,I36,I37]];
 
 R<t> := PolynomialRing(Rationals());
 K<a> := NumberField(R![2, 1, -1, 1]); ///cubic field with discriminant = -139
