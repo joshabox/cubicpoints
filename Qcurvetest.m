@@ -1,4 +1,5 @@
 // This code is a partial implementation of the algorithm described in Cremona and Najman's paper "Q-curves over odd degree number fields" https://arxiv.org/abs/2004.10054
+// The code could potentially be made more efficient by appealing to Prop 5.1 (2) in their paper. 
 
 // The following function takes a j-invariant and returns:
 // 1) true, D -  if the EC has CM by the quadratic order defined by D
