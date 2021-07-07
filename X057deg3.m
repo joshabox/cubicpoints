@@ -313,7 +313,7 @@ bp1 := Place(cusps[1]); // MWSieve seems to require this, though it's not passed
 bp2 := 2* bp1; // likewise
 auts:=[al[1],al[2]];
 I:=2;
-load "cubicsieve.m";
+load "Cubicsieve.m";
 
 // We need to check that the matrix over Q has rank 2. 
 etas:=[ALMap(X,aut) : aut in auts];
