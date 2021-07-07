@@ -82,8 +82,8 @@ C,phi,psi:=ClassGroup(X11);
 degr:=hom<C->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(C)]>;
 JF11:=Kernel(degr); // This is isomorphic to J_X(\F_7).
 X19:=ChangeRing(X,GF(19));
-C,phi,psi:=ClassGroup(X19);
-degr:=hom<C->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(C)]>;
+C,phi19,psi:=ClassGroup(X19);
+degr:=hom<C->Z | [ Degree(phi19(a))*Z.1 : a in OrderedGenerators(C)]>;
 JF19:=Kernel(degr); // This is isomorphic to J_X(\F_7)
 assert not IsSingular(X11) and not IsSingular(X19);
 assert IsIsomorphic(JF11,AbelianGroup([2,2^2*3*5*7^2*37]));
