@@ -256,27 +256,6 @@ searchDiv2:=function(X,bd,tf);
 end function;
 
 
-//Input: curve X, isomorphism phi: X --> Y with Y planar and bound bd.
-searchDiv3:=function(X,phi,bd)
-Y:=Codomain(phi);
-P<x,y,z>:=AmbientSpace(Y);
-eqnY:=DefiningEquations(Y)[1];
-deg3Y:={};
-for a in [-bd..bd] do
-    for b in [-bd..bd] do
-        eqn:=Evaluate(eqnY,[x,a*x+b*z,z]);
-        fact:=[g[1] : g in Factorization(eqn)];
-        deg3factors:=[g: g in fact | Degree(g) eq 3];
-        deg3Y2:=deg3Y join {Divisor(Y,[g,y-a*x+b*z]) : g in deg3factors};
-        if #deg3Y2 gt #deg3Y then #deg3Y2; deg3Y2; end if;
-        deg3Y:=deg3Y2;
-    end for;
-end for;
-deg3X:=[Pullback(phi,DD) : DD in deg3Y];
-return deg3X;
-end function;
-tf,phi:=Genus5PlaneCurveModel(X);
-assert tf;
 
 // X is a projective curve over rationals,
 // p prime of good reduction,
