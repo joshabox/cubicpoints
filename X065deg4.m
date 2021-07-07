@@ -78,13 +78,13 @@ assert Eltseq(2*phi5(MWE5.2)) in [Eltseq(QE),Eltseq(-QE)]; //2*phi5(MWE5.2) = QE
 OQ5:=MaximalOrder(Q5);
 assert #Factorization(11*OQ5) eq 2 and #Factorization(19*OQ5) eq 2; //11, 19 split in Q5
 X11:=ChangeRing(X,GF(11));
-C,phi,psi:=ClassGroup(X11);
-degr:=hom<C->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(C)]>;
-JF11:=Kernel(degr); // This is isomorphic to J_X(\F_7).
+C,phi11,psi:=ClassGroup(X11);
+degr:=hom<C->Z | [ Degree(phi11(a))*Z.1 : a in OrderedGenerators(C)]>;
+JF11:=Kernel(degr); // This is isomorphic to J_X(\F_11).
 X19:=ChangeRing(X,GF(19));
 C,phi19,psi:=ClassGroup(X19);
 degr:=hom<C->Z | [ Degree(phi19(a))*Z.1 : a in OrderedGenerators(C)]>;
-JF19:=Kernel(degr); // This is isomorphic to J_X(\F_7)
+JF19:=Kernel(degr); // This is isomorphic to J_X(\F_19)
 assert not IsSingular(X11) and not IsSingular(X19);
 assert IsIsomorphic(JF11,AbelianGroup([2,2^2*3*5*7^2*37]));
 assert IsIsomorphic(JF19,AbelianGroup([2*3*23,2^2*3*7*13*23]));
