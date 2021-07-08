@@ -151,24 +151,8 @@ auts:=[al[1]];
 I:=2;
 primes:=[q : q in PrimesUpTo(500) | q gt 300];
 smallprimes:=[73,59,53,37,17,131,167,359];
-
-/*
-for p in primes do
-    p;
-    Fp:=GF(p); Fp2:=GF(p^2);
-    Xp:=ChangeRing(X,Fp);
-    CC,phi,psi:=ClassGroup(Xp);
-    Z:=FreeAbelianGroup(1);
-    degr:=hom<CC->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(CC)]>;
-    JFp:=Kernel(degr); // This is isomorphic to J_X(\F_p).
-    h:=hom<A -> JFp | [JFp!psi(reduce(X,Xp,D1)),JFp!psi(reduce(X,Xp,D2)),JFp!psi(reduce(X,Xp,Dtor))]>;
-    m2:=hom<JFp -> JFp | [2*g : g in OrderedGenerators(JFp)]>;
-    [h(A.1) in Image(m2),
-    h(A.2) in Image(m2),
-    h(A.1+A.2)in Image(m2)];
-end for;
-*/
+badpts:=[false : i in deg3npb];
 
 load "Cubicsieve.m";
 
-MWSieve(deg3pb,deg3npb,smallprimes,X,A,divs,auts,genusC,I,bp);
+MWSieve(deg3pb,deg3npb,badpts,smallprimes,X,A,divs,auts,genusC,I,bp);
