@@ -175,6 +175,15 @@ end if;
 return false;
 end function;
 
+ModpALMaps := function(X,Xp,auts)
+dim := Dimension(AmbientSpace(X));
+ws:=[]; //The set of mod p Atkin-Lehner involution(s)
+for M in auts do
+    row:=[&+[RowSequence(M)[i][j]*u[j] : j in [1..dim+1]] : i in [1..dim+1]];
+    Append(~ws,iso<Xp->Xp | row,row>);
+end for;
+return ws;
+end function;
 
 ALMap := function(X,aut)
 R<[u]>:=CoordinateRing(AmbientSpace(X));
@@ -195,6 +204,7 @@ end if;
 // We first check if pb is a sum of rational pts
 rational := false;
 AwkwardDivisor := false;
+RamifiedPoint := false;
 n := #rationalpts;
 for i in {x: x in CartesianProduct([{1 .. n},{1..n}])| x[1] le x[2]} do
 if pb eq (rationalpts[i[1]]+ rationalpts[i[2]]) then
@@ -208,7 +218,11 @@ end for;
 if rational then
   if Multiplicity(index,index[1]) eq 3 then
    ImportantPoints := [ratpt]; // need to select "w(Q)" (=Q here)
-   AwkwardDivisor := true;
+      if Pullback(eta,1*ratpt) eq 1*ratpt then
+          RamifiedPoint := true; // just to check
+          else
+          AwkwardDivisor := true;
+   end if;
   elif (Multiplicity(index,index[1]) eq 2) then
    ImportantPoints := (Multiplicity(index,index[2]) eq 2) select [rationalpts[index[3]]] else  [rationalpts[index[2]]]; // need to select "w(Q)"
    AwkwardDivisor := true;
@@ -233,6 +247,12 @@ tQtilde:=UniformizingParameter(Qtilde);
 Append(~Arows,[Fp2!Evaluate(omega/Differential(tQtilde),Qtilde) : omega in omegas]);
 if AwkwardDivisor then
 Append(~Arows,[Fp2!Evaluate((omega/Differential(tQtilde)-Evaluate(omega/Differential(tQtilde),Qtilde))/tQtilde,Qtilde) : omega in omegas]);
+elif RamifiedPoint then
+Arows := [];
+wp := ModpALMaps(X,Xp,auts)[1];
+s := tQtilde - Pullback(wp,tQtilde); // choice of uniformizer as in Example 4.3
+Append(~Arows,[Fp2!Evaluate(omega/Differential(s),Qtilde) : omega in omegas]);
+Append(~Arows,[Fp2!Evaluate((omega/Differential(s)-Evaluate(omega/Differential(s),Qtilde))/s^2,Qtilde) : omega in omegas]); // Gives the third column as in Example 4.3
 end if;
 end for;
 
