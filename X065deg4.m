@@ -102,7 +102,7 @@ deg2pb:=[DD : DD in deg1p1 | not DD in deg2npb] cat deg2pb; //We split into pull
 deg3pb:=[<Place(pt1),DD> : pt1 in ptsX, DD in deg2pb];
 //deg3npb:=[Divisor(pt1)+Divisor(pt2)+Divisor(pt3) : pt1 in ptsX, pt2 in ptsX, pt3 in ptsX | #({pt1,pt2,pt3} meet {w65(pt1),w65(pt2),w65(pt3)}) eq 0];
 deg4npb:=[Divisor(pt1)+Divisor(pt2)+Divisor(pt3) +Divisor(pt4): pt1 in ptsX, pt2 in ptsX, pt3 in ptsX, pt4 in ptsX | #({pt1,pt2,pt3,pt4} meet {w65(pt1),w65(pt2),w65(pt3),w65(pt4)}) eq 0];
-deg4pbQuad := [<DD1,DD2,2> : DD1 in deg2pb, DD2 in deg2pb] cat [<DD1,DD2,3> : DD1 in deg2npb, DD2 in deg2pb];
+deg4pbQuad := [<DD1,DD2,2> : DD1 in deg2pb, DD2 in deg2pb] cat [<DD1,DD2,3> : DD1 in deg2npb, DD2 in deg2pb]; // the third entry here gives the rank needed to apply Theorem 2.6
 //deg4pbsum :=  [DD1+DD2 : DD1 in deg2pb, DD2 in deg2pb] cat [DD1+DD2 : DD1 in deg2npb, DD2 in deg2pb];
 
 // We now compute quartic points on X via quadratic points on E.
@@ -112,7 +112,7 @@ for D in Edeg2 do
 dec := Decomposition(D);
 deg := Degree(dec[1][1]);
 if deg eq 1 and #dec eq 2 then
-Append(~deg4pbQuad,<Pullback(XtoE,dec[1][1]),Pullback(XtoE,dec[2][1]),2>);
+Append(~deg4pbQuad,<Pullback(XtoE,dec[1][1]),Pullback(XtoE,dec[2][1]),2>); // Pullbacks of doubles of rational points have already been added, so we omit them here.
 continue; 
 end if;
 Pb := Pullback(XtoE,dec[1][1]);
