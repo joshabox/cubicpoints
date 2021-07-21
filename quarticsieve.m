@@ -206,19 +206,20 @@ end function;
 
 
 
-ChabautyInfo:=function(LpbQuad,LpbQuartic,Lnpb,p,X,auts,genusC,A,B,iA,W,divs,I,bp)
+ChabautyInfo:=function(LpbQuad,LpbQuartic,Lnpb,p,X,auts,genusC,A,B,iA,W,divs,I,bp,bp2)
 Fp:=GF(p); Fp2:=GF(p^2);
 Xp:=ChangeRing(X,Fp);
 Rp<xp,yp,zp>:=CoordinateRing(AmbientSpace(Xp));
 Cp:=ChangeRing(C,Fp);
-CC,phi,psi:=ClassGroup(Xp);
+CCC,phi,psi:=ClassGroup(Xp);
 Z:=FreeAbelianGroup(1);
-degr:=hom<CC->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(CC)]>;
+degr:=hom<CCC->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(CCC)]>;
 JFp:=Kernel(degr); // This is isomorphic to J_X(\F_p).
 divsp:=[reduce(X,Xp,divi) : divi in divs];
 bpp:=reduce(X,Xp,bp); //We reduce the divisors and the basepoint
 //bpp1:=reduce(X,Xp,bp1);
 bpp2:=reduce(X,Xp,bp2);
+assert Degree(bpp2) eq 2;
 h:=hom<A -> JFp | [JFp!psi(divp) : divp in divsp]>; //The map A --> J_X(\F_p).
 
 Bp,iAp:=sub<A | Kernel(h)>;
@@ -249,6 +250,7 @@ if not p eq 2 then assert Dimension(T) eq Genus(X) - genusC; end if; //cf Remark
 omegas:=[phii(T.i) : i in [1..Dimension(T)]]; //A basis of vanishing differentials
 
 redL1pbQuad:=[<reduce(X,Xp,DD[1]),reduce(X,Xp,DD[2])> : DD in LpbQuad];
+assert &and[[Degree(DD[1]),Degree(DD[2])] eq [2,2] : DD in redL1pbQuad];
 redL1pbQuartic:=[reduce(X,Xp,DD) : DD in LpbQuartic];
 redL1npb:=[reduce(X,Xp,DD) : DD in Lnpb];
 redLpbQuad:=[<JFp!psi(DD[1]-bpp2),JFp!psi(DD[2]-bpp2)> : DD in redL1pbQuad]; 
@@ -284,7 +286,7 @@ W:=[x : x in W | h(x) in mnjposP];
 return W,B,iA; 
 end function;
 
-MWSieve:=function(LpbQuad, LpbQuartic,Lnpb,smallprimes,X,A,divs,auts,genusC,I,bp)
+MWSieve:=function(LpbQuad, LpbQuartic,Lnpb,smallprimes,X,A,divs,auts,genusC,I,bp,bp2)
 print "Welcome to our sieve.";
 print "If I return true then all points are known.";
 
@@ -296,7 +298,7 @@ W:={0*A.1}; // This will be our set of possible B-cosets in A. Will grow.
 // multiplication by integer I such that I*J(X)(\Q) \subset A.
 for p in smallprimes do
 print "We consider the prime"; p;
-W,B,iA:=ChabautyInfo(LpbQuad, LpbQuartic,Lnpb,p,X,auts,genusC,A,B,iA,W,divs,I,bp);
+W,B,iA:=ChabautyInfo(LpbQuad, LpbQuartic,Lnpb,p,X,auts,genusC,A,B,iA,W,divs,I,bp,bp2);
 print "The number of cosets in J(X)(Q) where unknown points can land is"; #W;
 smallsols:=[w : w in W | &+[AbsoluteValue(Integers()!a) : a in Eltseq(w)] lt 100];
 if #smallsols gt 0 then smallsols; end if;
