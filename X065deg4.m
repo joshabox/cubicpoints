@@ -22,11 +22,11 @@ Dtors:=[Divisor(cusps[i])-Divisor(cusps[1]) : i in [2,3,4]];
 assert &and[not IsPrincipal(Dtor) : Dtor in Dtors]; //Sanity check
 //To compute the rational cuspidal subgroup, we embed the torsion subgroup into J_X(\F_7)
 X7:=ChangeRing(X,GF(7));
-C,phi,psi:=ClassGroup(X7);
+C,phi7,psi7:=ClassGroup(X7);
 Z:=FreeAbelianGroup(1);
-degr:=hom<C->Z | [ Degree(phi(a))*Z.1 : a in OrderedGenerators(C)]>;
-JF7:=Kernel(degr); // This is isomorphic to J_X(\F_7).
-redDtors:=[JF7!psi(reduce(X,X7,DD)) : DD in Dtors];
+degr7:=hom<C->Z | [ Degree(phi7(a))*Z.1 : a in OrderedGenerators(C)]>;
+JF7:=Kernel(degr7); // This is isomorphic to J_X(\F_7).
+redDtors:=[JF7!psi7(reduce(X,X7,DD)) : DD in Dtors];
 A:=sub<JF7 | redDtors>; //This is isomorphic to J_X(\Q)_{tors}.
 B:=AbelianGroup([2,84]);
 tf,isomm:=IsIsomorphic(A,B); assert tf;
@@ -65,7 +65,7 @@ assert 1*Place(PP) eq D; //This shows the generator is as claimed.
 
 //Next, we show that <D1,Dtors[1],Dtors[2]> is the full MW group, and does not have index 2. 
 m2:=hom<JF7 -> JF7 | [2*g : g in OrderedGenerators(JF7)]>;
-redD1:=JF7!psi(reduce(X,X7,D1));
+redD1:=JF7!psi7(reduce(X,X7,D1));
 assert &and[not redDtors[1]+redD1 in Image(m2), not redDtors[2]+redD1 in Image(m2), not redDtors[1]+redDtors[2]+redD1 in Image(m2)];
 //This leaves only D1 as a possible candidate for being a double. 
 Q5:=QuadraticField(5);
@@ -78,13 +78,13 @@ assert Eltseq(2*phi5(MWE5.2)) in [Eltseq(QE),Eltseq(-QE)]; //2*phi5(MWE5.2) = QE
 OQ5:=MaximalOrder(Q5);
 assert #Factorization(11*OQ5) eq 2 and #Factorization(19*OQ5) eq 2; //11, 19 split in Q5
 X11:=ChangeRing(X,GF(11));
-C11,phi11,psi:=ClassGroup(X11);
-degr:=hom<C11->Z | [ Degree(phi11(a))*Z.1 : a in OrderedGenerators(C11)]>;
-JF11:=Kernel(degr); // This is isomorphic to J_X(\F_11).
+C11,phi11,psi11:=ClassGroup(X11);
+degr11:=hom<C11->Z | [ Degree(phi11(a))*Z.1 : a in OrderedGenerators(C11)]>;
+JF11:=Kernel(degr11); // This is isomorphic to J_X(\F_11).
 X19:=ChangeRing(X,GF(19));
-C19,phi19,psi:=ClassGroup(X19);
-degr:=hom<C19->Z | [ Degree(phi19(a))*Z.1 : a in OrderedGenerators(C19)]>;
-JF19:=Kernel(degr); // This is isomorphic to J_X(\F_19)
+C19,phi19,psi19:=ClassGroup(X19);
+degr19:=hom<C19->Z | [ Degree(phi19(a))*Z.1 : a in OrderedGenerators(C19)]>;
+JF19:=Kernel(degr19); // This is isomorphic to J_X(\F_19)
 assert not IsSingular(X11) and not IsSingular(X19);
 assert IsIsomorphic(JF11,AbelianGroup([2,2^2*3*5*7^2*37]));
 assert IsIsomorphic(JF19,AbelianGroup([2*3*23,2^2*3*7*13*23]));
@@ -174,10 +174,10 @@ for DDD in excDs do
 "Next point";
 Pt := RepresentativePoint(Decomposition(DDD)[1][1]);
 F := Parent(Pt[1]);
-tf, phi := IsIsomorphic(F,K);
+tf, PHI := IsIsomorphic(F,K);
 assert tf;
-X(K)![phi(coef): coef in Eltseq(Pt)];
-phi(j(Pt));
+X(K)![PHI(coef): coef in Eltseq(Pt)];
+PHI(j(Pt));
 tf, D := CMorQcurve(j(Pt));
 if tf then
 "Has CM by", D;
@@ -205,10 +205,10 @@ Pts := [DF[1]: DF in DivsAndFields |DF[2] eq entry[2]];
 for DD in Pts do
 Pt := RepresentativePoint(Decomposition(DD)[1][1]);
 F := AbsoluteField(Parent(Pt[1]));
-tf, phi := IsIsomorphic(F, K);
+tf, PHI := IsIsomorphic(F, K);
 assert tf;
-X(K)![phi(coef): coef in Eltseq(Pt)];
-phi(j(Pt));
+X(K)![PHI(coef): coef in Eltseq(Pt)];
+PHI(j(Pt));
 tf, D := CMorQcurve(j(Pt));
 if tf then
 "Has CM by", D;
@@ -223,7 +223,7 @@ deg4npb := deg4npb cat [Divisor(pt) + D: pt in ptsX, D in excDs] cat [Divisor(X,
 deg4pbQuartic := [Divisor(X,I) : I in deg4pbnew] cat deg4pbQuart;
 
 //Finally, we do the sieve.
-assert &and[not IsSingular(ChangeRing(X,GF(p))) : p in [17,23]]; //Sanity check to verify that X has good reduction at primes used in the sieve.
+assert &and[not IsSingular(ChangeRing(X,GF(p))) : p in [17,19,23]]; //Sanity check to verify that X has good reduction at primes used in the sieve.
 A:=AbelianGroup([0,2,84]);
 divs:=[D1,-9*Dtors[1]+2*Dtors[2],17*Dtors[1]+13*Dtors[2]];
 genusC:=Genus(C);
@@ -236,5 +236,5 @@ smallprimes := [17,19,23];
 load "quarticsieve.m";
 
 
-MWSieve(deg4pbQuad, deg4pbQuartic,deg4npb,smallprimes,X,A,divs,auts,genusC,I,bp); //Returns true if we have found all deg 4 points.
+MWSieve(deg4pbQuad, deg4pbQuartic,deg4npb,smallprimes,X,A,divs,auts,genusC,I,bp,bp2); //Returns true if we have found all deg 4 points.
 
